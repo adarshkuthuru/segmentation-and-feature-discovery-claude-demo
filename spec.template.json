@@ -1,0 +1,33 @@
+{
+  "_README": "Run spec template. Copy to config.json (or pass --config). Every example-specific fact lives here; the SKILL + tools are generic. Remove the _comment_* keys before use (JSON has no comments).",
+
+  "name": "my_use_case",
+  "data_path": "data/your_data.csv",
+  "sheet": null,
+
+  "_comment_target": "Define the 0/1 outcome ONE of three ways: existing column, non-null-of-a-column, or value-equals.",
+  "target": {
+    "name": "responded",
+    "from_notnull": "APPLICATION_ID"
+  },
+  "_target_alt_existing_column": {"name": "y", "column": "label", "positive_value": 1},
+  "_target_alt_value":          {"name": "churned", "from_value": {"column": "status", "equals": "closed"}},
+
+  "_comment_direction": "'suppression' = find LOW-rate segments (e.g. non-responders to drop). 'targeting' = find HIGH-rate segments (e.g. best prospects).",
+  "direction": "suppression",
+
+  "_comment_columns": "id_columns + exclude_columns are never used as features. Put POST-OUTCOME / leakage fields in exclude (anything known only after the outcome). feature_columns=null => auto-select numeric + low-cardinality columns.",
+  "id_columns": ["RECORD_ID"],
+  "exclude_columns": ["POST_OUTCOME_FIELD"],
+  "feature_columns": null,
+
+  "_comment_time": "Optional. A time/cohort column used to validate stability of each segment across periods.",
+  "time_column": null,
+
+  "_comment_missing": "Numeric sentinel codes to treat as missing (NaN). Read these from the data dictionary; keep legitimate 'max valid' caps OUT of this list.",
+  "missing_sentinels": [],
+
+  "min_segment_pct": 1.0,
+  "max_auto_features": 40,
+  "data_dictionary": null
+}

@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c ' *)",
+      "Bash(ls tools/)",
+      "Bash(ls *.json)",
+      "Bash(python tools/tree_cuts.py)",
+      "Bash(python tools/subgroup_search.py)",
+      "Bash(python tools/stability.py)",
+      "Bash(python tools/drivers.py)",
+      "Bash(python run_demo.py)",
+      "Bash(ls -la outputs/)",
+      "Bash(ls -la archives/)",
+      "Bash(python)",
+      "mcp__visualize__read_me",
+      "mcp__visualize__show_widget",
+      "Bash(mkdir -p \"C:\\\\Users\\\\AdarshKuthuru\\\\.claude\\\\projects\\\\C--Users-AdarshKuthuru-Downloads-2026-Agentic-AI-Capability-Evaluation---Zenon-segment-discovery-demo\\\\memory\")",
+      "Bash(pip show *)",
+      "Bash(python build_ppt.py)",
+      "Bash(del \"C:\\\\Users\\\\AdarshKuthuru\\\\Downloads\\\\2026\\\\Agentic AI Capability Evaluation - Zenon\\\\segment-discovery-demo\\\\build_ppt.py\")"
+    ]
+  }
+}

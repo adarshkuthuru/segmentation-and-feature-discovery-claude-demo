@@ -18,7 +18,25 @@
       "Bash(mkdir -p \"C:\\\\Users\\\\AdarshKuthuru\\\\.claude\\\\projects\\\\C--Users-AdarshKuthuru-Downloads-2026-Agentic-AI-Capability-Evaluation---Zenon-segment-discovery-demo\\\\memory\")",
       "Bash(pip show *)",
       "Bash(python build_ppt.py)",
-      "Bash(del \"C:\\\\Users\\\\AdarshKuthuru\\\\Downloads\\\\2026\\\\Agentic AI Capability Evaluation - Zenon\\\\segment-discovery-demo\\\\build_ppt.py\")"
+      "Bash(del \"C:\\\\Users\\\\AdarshKuthuru\\\\Downloads\\\\2026\\\\Agentic AI Capability Evaluation - Zenon\\\\segment-discovery-demo\\\\build_ppt.py\")",
+      "Bash(python tools/memory.py --action read --config config.json)",
+      "Bash(cat spec.template.json)",
+      "Bash(cat config.json)",
+      "Bash(python tools/tree_cuts.py --config config.json)",
+      "Bash(python tools/subgroup_search.py --config config.json)",
+      "Bash(python tools/stability.py --config config.json)",
+      "Bash(python tools/drivers.py --config config.json)",
+      "Bash(python run_demo.py --config config.json)",
+      "Bash(python tools/memory.py --action compact --config config.json)",
+      "Bash(python tools/memory.py --action write --config config.json)",
+      "Bash(mkdir -p archives/2026-07-06)",
+      "Bash(cp outputs/*.pptx archives/2026-07-06/)",
+      "Bash(cp outputs/REPORT.md archives/2026-07-06/)",
+      "Bash(ls \"C:\\\\Users\\\\AdarshKuthuru\\\\Downloads\\\\2026\\\\Agentic AI Capability Evaluation - Zenon\\\\segmentation-and-feature-discovery-claude-demo\\\\\")",
+      "Bash(mkdir -p \"C:\\\\Users\\\\AdarshKuthuru\\\\Downloads\\\\2026\\\\Agentic AI Capability Evaluation - Zenon\\\\segmentation-and-feature-discovery-claude-demo\\\\.claude\\\\skills\\\\segment-discovery-reviewer\")",
+      "Skill(artifact-design)",
+      "Skill(artifact-design:*)",
+      "Bash(if [ ! -d \"C:/Users/AdarshKuthuru/Downloads/2026/Agentic AI Capability Evaluation - Zenon/segmentation-and-feature-discovery-claude-demo/.claude/skills/segment-discovery-reviewer\" ]; then mkdir -p \"C:/Users/AdarshKuthuru/Downloads/2026/Agentic AI Capability Evaluation - Zenon/segmentation-and-feature-discovery-claude-demo/.claude/skills/segment-discovery-reviewer\"; fi)"
     ]
   }
 }

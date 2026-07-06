@@ -1,17 +1,29 @@
 {
-  "name": "credit_card_suppression",
+  "name": "capital_one_dm_suppression",
   "data_path": "data/Sample_Data.csv",
+  "sheet": null,
+
   "target": {
     "name": "responded",
     "from_notnull": "BCP_APPLICATION_ID"
   },
+
   "direction": "suppression",
-  "id_columns": ["SRC_ID", "SOLICITATION_ID", "ACCT_ID"],
-  "exclude_columns": ["BCP_ACCOUNT_ID", "BCP_APPLICATION_RECEIVED_DATE"],
+
+  "id_columns": ["SRC_ID", "ACCT_ID"],
+
+  "exclude_columns": [
+    "SOLICITATION_ID",
+    "BCP_APPLICATION_ID",
+    "BCP_ACCOUNT_ID",
+    "BCP_APPLICATION_RECEIVED_DATE",
+    "PV",
+    "TEST_CELL_DROP_DATE"
+  ],
+
   "feature_columns": [
     "FICO",
     "CURRENT_INCOME",
-    "PV",
     "EFX_AL_BAL_1",
     "EFX_BC_BAL_1",
     "EFX_BC_BAL_5",
@@ -36,8 +48,11 @@
     "EFX_BC_DQOCURNC_5",
     "EFX_BC_UTIL_1"
   ],
+
   "time_column": "TEST_CELL_DROP_DATE",
+
   "missing_sentinels": [9999997, 9999998, 9999999, 997, 998, 999],
+
   "min_segment_pct": 1.0,
   "max_auto_features": 40,
   "data_dictionary": "data/BEST_Data_Dictionary.xlsx"

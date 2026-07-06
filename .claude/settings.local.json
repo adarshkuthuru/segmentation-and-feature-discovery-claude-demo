@@ -9,6 +9,7 @@
       "Bash(python tools/stability.py)",
       "Bash(python tools/drivers.py)",
       "Bash(python run_demo.py)",
+      "Bash(python tools/memory.py *)",
       "Bash(ls -la outputs/)",
       "Bash(ls -la archives/)",
       "Bash(python)",

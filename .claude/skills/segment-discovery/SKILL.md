@@ -77,6 +77,18 @@ Figure it out, propose, confirm, then proceed:
 ---
 
 ## Workflow (run in order; narrate after each, numbers come from the CSVs)
+
+### Before running stages — read memory context
+Run `python tools/memory.py --action read --config config.json` (or wait for
+`run_demo.py` to print it automatically). Use what you see to:
+- Call out features that were **reliable in prior runs** (cross-run signal = higher confidence).
+- Warn if a rule in the current results resembles an **unstable rule from a prior run**.
+- Flag if the current BAU or best lift **deviates materially** from the typical range (possible
+  data drift or config change).
+- Note any **high-null features** flagged before, so the analyst isn't surprised again.
+
+---
+
 1. **EDA & one-feature cuts** — `python tools/tree_cuts.py [--config ...]`
    Establish BAU; show single-feature thresholds. Note single features are
    usually weak alone → motivates the multi-feature search.

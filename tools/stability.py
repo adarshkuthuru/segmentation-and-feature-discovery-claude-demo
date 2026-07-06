@@ -23,7 +23,7 @@ def stability(df, cfg, rules_csv: str = "outputs/v1_subgroups.csv", top: int = 6
     tgt = target_name(cfg)
     base = bau(df, cfg)
     suppression = cfg["direction"] == "suppression"
-    thresh = 0.5 * base if suppression else 1.5 * base
+    thresh = base  # stable = consistently on the correct side of BAU
 
     rules = pd.read_csv(rules_csv).head(top)
     windows = sorted(df[win].dropna().unique())

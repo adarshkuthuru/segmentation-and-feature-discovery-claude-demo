@@ -36,7 +36,8 @@
       "Bash(mkdir -p \"C:\\\\Users\\\\AdarshKuthuru\\\\Downloads\\\\2026\\\\Agentic AI Capability Evaluation - Zenon\\\\segmentation-and-feature-discovery-claude-demo\\\\.claude\\\\skills\\\\segment-discovery-reviewer\")",
       "Skill(artifact-design)",
       "Skill(artifact-design:*)",
-      "Bash(if [ ! -d \"C:/Users/AdarshKuthuru/Downloads/2026/Agentic AI Capability Evaluation - Zenon/segmentation-and-feature-discovery-claude-demo/.claude/skills/segment-discovery-reviewer\" ]; then mkdir -p \"C:/Users/AdarshKuthuru/Downloads/2026/Agentic AI Capability Evaluation - Zenon/segmentation-and-feature-discovery-claude-demo/.claude/skills/segment-discovery-reviewer\"; fi)"
+      "Bash(if [ ! -d \"C:/Users/AdarshKuthuru/Downloads/2026/Agentic AI Capability Evaluation - Zenon/segmentation-and-feature-discovery-claude-demo/.claude/skills/segment-discovery-reviewer\" ]; then mkdir -p \"C:/Users/AdarshKuthuru/Downloads/2026/Agentic AI Capability Evaluation - Zenon/segmentation-and-feature-discovery-claude-demo/.claude/skills/segment-discovery-reviewer\"; fi)",
+      "Bash(python \"C:\\\\Users\\\\AdarshKuthuru\\\\AppData\\\\Roaming\\\\Claude\\\\local-agent-mode-sessions\\\\skills-plugin\\\\7bfefc8c-6fb9-48ba-b804-9b57cb542a82\\\\0448c3e2-bec5-49c5-ad63-c79ab8556ab0\\\\skills\\\\pptx\\\\scripts\\\\extract-text.py\" outputs/Suppression_Segment_Report_2026-07-06.pptx)"
     ]
   }
 }

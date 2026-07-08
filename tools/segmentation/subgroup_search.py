@@ -9,7 +9,7 @@ For direction="suppression" we target the NEGATIVE class so the highest-
 deviation subgroups are the LOW-response ones; for "targeting" we target the
 positive class. Either way we then sort by lift in the requested direction.
 
-Usage:  python tools/subgroup_search.py [--config config.json]
+Usage:  python tools/segmentation/subgroup_search.py [--config config.json]
 """
 from __future__ import annotations
 import argparse
@@ -57,5 +57,5 @@ if __name__ == "__main__":
           f"features={len(feature_cols(df, cfg))}\n")
     print(f"Top multi-feature {cfg['direction']} segments:\n")
     print(res.head(12).to_string(index=False))
-    res.to_csv("outputs/v1_subgroups.csv", index=False)
-    print("\nSaved -> outputs/v1_subgroups.csv")
+    res.to_csv("outputs/segmentation/v1_subgroups.csv", index=False)
+    print("\nSaved -> outputs/segmentation/v1_subgroups.csv")

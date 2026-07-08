@@ -3,9 +3,9 @@ v0 tool  --  One-feature decision-tree cuts  (EDA + driver thresholds).
 
 For each feature, fit a shallow decision tree on the target and read off the
 threshold(s) that carve out the most extreme leaf. Rank by lift. Dataset-
-agnostic: everything comes from the run spec (see tools/common.py).
+agnostic: everything comes from the run spec (see tools/segmentation/common.py).
 
-Usage:  python tools/tree_cuts.py [--config config.json]
+Usage:  python tools/segmentation/tree_cuts.py [--config config.json]
 """
 from __future__ import annotations
 import argparse
@@ -67,5 +67,5 @@ if __name__ == "__main__":
     print(f"BAU response rate: {bau(df, cfg):.4%}   n={len(df):,}\n")
     print(f"Most extreme single-feature cuts ({cfg['direction']} candidates):\n")
     print(res.head(10).to_string(index=False))
-    res.to_csv("outputs/v0_tree_cuts.csv", index=False)
-    print("\nSaved -> outputs/v0_tree_cuts.csv")
+    res.to_csv("outputs/segmentation/v0_tree_cuts.csv", index=False)
+    print("\nSaved -> outputs/segmentation/v0_tree_cuts.csv")

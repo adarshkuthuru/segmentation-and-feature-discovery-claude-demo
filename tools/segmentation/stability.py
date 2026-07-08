@@ -1,13 +1,13 @@
 """
 v2 tool  --  Stability / trend validation across a time or cohort column.
 
-Takes the discovered rules (outputs/v1_subgroups.csv) and re-computes the target
+Takes the discovered rules (outputs/segmentation/v1_subgroups.csv) and re-computes the target
 rate within each value of cfg["time_column"]. A segment is STABLE if it stays on
 the right side of BAU in every window. Dataset-agnostic.
 
 If no time_column is set in the run spec, this is a no-op (prints a notice).
 
-Usage:  python tools/stability.py [--config config.json]
+Usage:  python tools/segmentation/stability.py [--config config.json]
 """
 from __future__ import annotations
 import argparse
@@ -16,7 +16,7 @@ import pysubgroup as ps
 from common import load_config, load_data, segment_stats, bau, target_name
 
 
-def stability(df, cfg, rules_csv: str = "outputs/v1_subgroups.csv", top: int = 6):
+def stability(df, cfg, rules_csv: str = "outputs/segmentation/v1_subgroups.csv", top: int = 6):
     win = cfg.get("time_column")
     if not win or win not in df.columns:
         return None
@@ -59,5 +59,5 @@ if __name__ == "__main__":
         print(f"\nBAU={base:.4%}  window={cfg['time_column']}  "
               f"direction={cfg['direction']}\n")
         print(res.to_string(index=False))
-        res.to_csv("outputs/v2_stability.csv", index=False)
-        print("\nSaved -> outputs/v2_stability.csv")
+        res.to_csv("outputs/segmentation/v2_stability.csv", index=False)
+        print("\nSaved -> outputs/segmentation/v2_stability.csv")

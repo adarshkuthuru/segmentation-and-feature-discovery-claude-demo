@@ -37,7 +37,32 @@
       "Skill(artifact-design)",
       "Skill(artifact-design:*)",
       "Bash(if [ ! -d \"C:/Users/AdarshKuthuru/Downloads/2026/Agentic AI Capability Evaluation - Zenon/segmentation-and-feature-discovery-claude-demo/.claude/skills/segment-discovery-reviewer\" ]; then mkdir -p \"C:/Users/AdarshKuthuru/Downloads/2026/Agentic AI Capability Evaluation - Zenon/segmentation-and-feature-discovery-claude-demo/.claude/skills/segment-discovery-reviewer\"; fi)",
-      "Bash(python \"C:\\\\Users\\\\AdarshKuthuru\\\\AppData\\\\Roaming\\\\Claude\\\\local-agent-mode-sessions\\\\skills-plugin\\\\7bfefc8c-6fb9-48ba-b804-9b57cb542a82\\\\0448c3e2-bec5-49c5-ad63-c79ab8556ab0\\\\skills\\\\pptx\\\\scripts\\\\extract-text.py\" outputs/Suppression_Segment_Report_2026-07-06.pptx)"
+      "Bash(python \"C:\\\\Users\\\\AdarshKuthuru\\\\AppData\\\\Roaming\\\\Claude\\\\local-agent-mode-sessions\\\\skills-plugin\\\\7bfefc8c-6fb9-48ba-b804-9b57cb542a82\\\\0448c3e2-bec5-49c5-ad63-c79ab8556ab0\\\\skills\\\\pptx\\\\scripts\\\\extract-text.py\" outputs/Suppression_Segment_Report_2026-07-06.pptx)",
+      "Bash(python -c \"import polars, matplotlib, seaborn, openpyxl; print\\('ok'\\)\")",
+      "Bash(mkdir -p output/figures)",
+      "Bash(python scratch_eda.py)",
+      "Bash(python scratch_eda2.py)",
+      "Bash(pip install *)",
+      "Bash(python tools/EDA/eda_sample_data.py)",
+      "Bash(python -c \"import scipy\")",
+      "Bash(python -c \"import pptx; print\\('ok'\\)\")",
+      "Bash(python tools/EDA/make_exec_deck_sample_data.py)",
+      "Bash(python -)",
+      "Bash(python -c \"import ast; [ast.parse\\(open\\(f, encoding='utf-8'\\).read\\(\\), f\\) for f in ['tools/segmentation/tree_cuts.py','tools/segmentation/subgroup_search.py','tools/segmentation/stability.py','tools/segmentation/drivers.py','tools/segmentation/memory.py','tools/segmentation/build_overview_ppt.py','tools/segmentation/build_ppt_2026_07_06.py']]; print\\('all parse OK'\\)\")",
+      "Bash(grep -n '`output/\\\\|\\(output/\\\\| output/' .claude/skills/dataset-analyzer/SKILL.md)",
+      "Bash(grep -n '`output/\\\\|\\(output/\\\\| output/' .claude/skills/eda-reviewer/SKILL.md)",
+      "Bash(grep -rln 'outputs/v[0-9]\\\\|outputs/REPORT\\\\|outputs/<dated>\\\\|outputs/templates\\\\|`output/\\\\|\\(output/\\\\|templates/Zenon\\\\|\"templates/\\\\|python tools/[a-z]' --include=\"*.py\" --include=\"*.md\" .)",
+      "Bash(grep -n 'outputs/v[0-9]\\\\|outputs/REPORT\\\\|outputs/<dated>\\\\|outputs/templates\\\\|`output/\\\\|\\(output/\\\\|templates/Zenon\\\\|\"templates/\\\\|python tools/[a-z]' .claude/skills/segment-discovery/SKILL.md README.md)",
+      "Bash(cp tools/EDA/eda_sample_data.py tools/EDA/eda_full_data.py)",
+      "Bash(cp tools/EDA/make_exec_deck_sample_data.py tools/EDA/make_exec_deck_full_data.py)",
+      "Bash(git rm *)",
+      "Bash(rm tools/EDA/eda_sample_data.py tools/EDA/make_exec_deck_sample_data.py tools/EDA/make_exec_deck.py)",
+      "Bash(rm -rf tools/__pycache__)",
+      "Bash(cd \"C:\\\\Users\\\\AdarshKuthuru\\\\Downloads\\\\2026\\\\Agentic AI Capability Evaluation - Zenon\\\\segmentation-and-feature-discovery-claude-demo\" && rm -f outputs/EDA/Sample_Data_eda_report.md outputs/EDA/Sample_Data_executive_summary.pptx \"outputs/EDA/~\\\\$Sample_Data_executive_summary.pptx\" && ls outputs/EDA/)",
+      "Bash(python tools/EDA/eda_full_data.py)",
+      "Bash(python tools/EDA/make_exec_deck_full_data.py)",
+      "Bash(git mv *)",
+      "Bash(mv memory.md memory_segmentation.md)"
     ]
   }
 }

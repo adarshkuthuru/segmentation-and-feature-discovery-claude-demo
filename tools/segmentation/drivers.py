@@ -5,7 +5,7 @@ Fits a gradient-boosted model on the target and uses SHAP to rank which
 attributes most drive the outcome globally. Confirms the discovered rules are
 mechanistically sensible, not artifacts. Dataset-agnostic.
 
-Usage:  python tools/drivers.py [--config config.json]
+Usage:  python tools/segmentation/drivers.py [--config config.json]
 """
 from __future__ import annotations
 import argparse
@@ -42,5 +42,5 @@ if __name__ == "__main__":
     print(f"\n[{cfg.get('name','run')}] Top drivers of {target_name(cfg)} "
           f"(mean |SHAP|):\n")
     print(res.head(15).to_string(index=False))
-    res.to_csv("outputs/v3_drivers.csv", index=False)
-    print("\nSaved -> outputs/v3_drivers.csv")
+    res.to_csv("outputs/segmentation/v3_drivers.csv", index=False)
+    print("\nSaved -> outputs/segmentation/v3_drivers.csv")

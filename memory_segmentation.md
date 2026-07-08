@@ -1,6 +1,8 @@
 # Segment Discovery Run Memory
 
-_Auto-maintained by tools/memory.py. Entries older than 30 days are summarised._
+_Workstream: segment-discovery. Auto-maintained by tools/segmentation/memory.py.
+Entries older than 30 days are summarised. For the dataset-analyzer (EDA)
+workstream, see [memory_eda.md](memory_eda.md) instead._
 
 ## ACTIVE RUNS (last 30 days)
 

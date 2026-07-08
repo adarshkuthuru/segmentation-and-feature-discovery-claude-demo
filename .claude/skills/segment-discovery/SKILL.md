@@ -24,13 +24,13 @@ target (a 0/1 outcome). A good segment is: (1) described by a simple rule on rea
 features, (2) materially different from BAU on the target, (3) large enough to
 act on, (4) stable over time.
 
-**Golden rule: this skill and the `tools/` scripts are 100% generic. Everything
-specific to an example lives in a JSON run spec (`config.json`). Your job is to
-produce a correct run spec, then run the stages and narrate.** Never hardcode a
-column name, target, or path into the tools.
+**Golden rule: this skill and the `tools/segmentation/` scripts are 100% generic.
+Everything specific to an example lives in a JSON run spec (`config.json`). Your
+job is to produce a correct run spec, then run the stages and narrate.** Never
+hardcode a column name, target, or path into the tools.
 
 ## The run spec is the contract
-The tools read a JSON spec (schema documented in `tools/common.py`, template in
+The tools read a JSON spec (schema documented in `tools/segmentation/common.py`, template in
 `spec.template.json`). Key fields: `data_path`, `target` (how to derive the 0/1
 outcome), `direction` (`suppression`=low-rate / `targeting`=high-rate),
 `id_columns`, `exclude_columns` (**leakage/post-outcome fields**), optional
@@ -79,8 +79,8 @@ Figure it out, propose, confirm, then proceed:
 ## Workflow (run in order; narrate after each, numbers come from the CSVs)
 
 ### Before running stages — read memory context
-Run `python tools/memory.py --action read --config config.json` (or wait for
-`run_demo.py` to print it automatically). Use what you see to:
+Run `python tools/segmentation/memory.py --action read --config config.json`
+(or wait for `run_demo.py` to print it automatically, if present). Use what you see to:
 - Call out features that were **reliable in prior runs** (cross-run signal = higher confidence).
 - Warn if a rule in the current results resembles an **unstable rule from a prior run**.
 - Flag if the current BAU or best lift **deviates materially** from the typical range (possible
@@ -89,22 +89,23 @@ Run `python tools/memory.py --action read --config config.json` (or wait for
 
 ---
 
-1. **EDA & one-feature cuts** — `python tools/tree_cuts.py [--config ...]`
+1. **EDA & one-feature cuts** — `python tools/segmentation/tree_cuts.py [--config ...]`
    Establish BAU; show single-feature thresholds. Note single features are
    usually weak alone → motivates the multi-feature search.
-2. **Multi-feature subgroup search** — `python tools/subgroup_search.py`
+2. **Multi-feature subgroup search** — `python tools/segmentation/subgroup_search.py`
    The core. Ranked multi-condition rules with size + rate + lift. These are the
    non-obvious combinations the manual loop misses.
-3. **Stability validation** — `python tools/stability.py`
+3. **Stability validation** — `python tools/segmentation/stability.py`
    Re-checks each top rule within each `time_column` value; flags any that is not
    persistently on the right side of BAU. (No-op if no `time_column`.)
-4. **Driver analysis** — `python tools/drivers.py`
+4. **Driver analysis** — `python tools/segmentation/drivers.py`
    SHAP ranking of global drivers; confirm the rules are mechanistically sensible.
-5. **Report** — `python run_demo.py` writes `outputs/REPORT.md` with ranked,
-   validated segments + a business headline.
+5. **Report** — write ranked, validated segments + a business headline to
+   `outputs/segmentation/REPORT.md` (via `run_demo.py` if present, else compile
+   directly from the stage CSVs).
 
 ## Rules of engagement
-- **Never invent statistics** — read the tool's CSV in `outputs/`, then narrate.
+- **Never invent statistics** — read the tool's CSV in `outputs/segmentation/`, then narrate.
 - **Confidence/lift is deterministic** (computed in the tools); you interpret.
 - **Human-in-the-loop**: present ranked rules to accept/reject; don't auto-decide.
 - **Guard against leakage** — the single most common failure. Anything populated

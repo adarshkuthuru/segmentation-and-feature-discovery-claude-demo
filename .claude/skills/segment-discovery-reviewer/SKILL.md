@@ -25,7 +25,7 @@ artifact is missing, that is itself a finding.
 ## What you may and may not do
 
 **Allowed — reading and reconciling:**
-- Read any artifact: `config.json`, stage CSVs, `REPORT.md`, the PPT, `memory.md`
+- Read any artifact: `config.json`, stage CSVs, `REPORT.md`, the PPT, `memory_segmentation.md`
 - Verify internal arithmetic (e.g. lift = segment_rate / BAU) using stated values
 - Cross-reference numbers across artifacts (v1 CSV ↔ REPORT ↔ PPT)
 - Read a raw data column's min/max or null count as a spot-check (one or two
@@ -50,13 +50,13 @@ The executor should have produced:
 | Artifact | Expected location | What to check |
 |---|---|---|
 | Run spec | `config.json` | Target definition, direction, excluded features, sentinels |
-| EDA / single-feature cuts | `outputs/v0_tree_cuts.csv` | BAU base rate, single-feature lift range |
-| Ranked rules | `outputs/v1_subgroups.csv` | Size, response rate, lift, rule text for top N |
-| Stability | `outputs/v2_stability.csv` | Per-wave rates, `stable` flag, threshold used |
-| SHAP drivers | `outputs/v3_drivers.csv` | Feature ranking, mean absolute SHAP |
-| Report | `outputs/REPORT.md` | Numbers in prose match CSVs; no stale content |
-| Executive PPT | `outputs/<dated>.pptx` | Headlines reconcile with REPORT; no PPT-only claims |
-| Memory | `memory.md` | Reflects actual run outcomes (BAU, lift, features) |
+| EDA / single-feature cuts | `outputs/segmentation/v0_tree_cuts.csv` | BAU base rate, single-feature lift range |
+| Ranked rules | `outputs/segmentation/v1_subgroups.csv` | Size, response rate, lift, rule text for top N |
+| Stability | `outputs/segmentation/v2_stability.csv` | Per-wave rates, `stable` flag, threshold used |
+| SHAP drivers | `outputs/segmentation/v3_drivers.csv` | Feature ranking, mean absolute SHAP |
+| Report | `outputs/segmentation/REPORT.md` | Numbers in prose match CSVs; no stale content |
+| Executive PPT | `outputs/segmentation/<dated>.pptx` | Headlines reconcile with REPORT; no PPT-only claims |
+| Memory | `memory_segmentation.md` | Reflects actual run outcomes (BAU, lift, features) |
 | Archives | `archives/<date>/` | Prior outputs preserved before overwrite |
 
 If any artifact is absent, note it before reviewing and cap the verdict
@@ -160,7 +160,7 @@ Work through every dimension. State **PASS / CONCERN / FAIL** with evidence.
   directionally sensible and consistent with the segment rules (a top rule
   should use features that SHAP also ranks highly).
 - Cross-check: do the SHAP values in v3_drivers.csv match what REPORT.md and
-  memory.md state? Flag any discrepancy.
+  memory_segmentation.md state? Flag any discrepancy.
 - Are the drivers translatable to plain language for an executive audience?
 
 ### 10 — Net business impact / ROI

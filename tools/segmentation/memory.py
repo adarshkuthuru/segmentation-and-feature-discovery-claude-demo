@@ -1,15 +1,17 @@
 """
 Persistent run memory for segment discovery.
 
-Appends a structured entry to memory.md after each run, reads recent context
-before a run, and summarises entries older than 30 days to keep the file lean.
+Appends a structured entry to memory_segmentation.md after each run, reads recent
+context before a run, and summarises entries older than 30 days to keep the file
+lean. This is the segment-discovery workstream's memory file — the dataset-analyzer
+(EDA) workstream keeps its own separate memory_eda.md at the project root.
 
 CLI:
-    python tools/memory.py --action read    [--config config.json]
-    python tools/memory.py --action write   [--config config.json]
-    python tools/memory.py --action compact
+    python tools/segmentation/memory.py --action read    [--config config.json]
+    python tools/segmentation/memory.py --action write   [--config config.json]
+    python tools/segmentation/memory.py --action compact
 
-Memory file: memory.md at the project root.
+Memory file: memory_segmentation.md at the project root.
 """
 from __future__ import annotations
 import argparse, json, os, re, sys
@@ -19,14 +21,15 @@ from pathlib import Path
 sys.path.insert(0, os.path.dirname(__file__))
 from common import load_config
 
-MEMORY_FILE = "memory.md"
+MEMORY_FILE = "memory_segmentation.md"
 CUTOFF_DAYS = 30
 RECENT_SHOW = 3
 
 _HEADER = (
     "# Segment Discovery Run Memory\n\n"
-    "_Auto-maintained by tools/memory.py. "
-    "Entries older than 30 days are summarised._\n\n"
+    "_Workstream: segment-discovery. Auto-maintained by tools/segmentation/memory.py. "
+    "Entries older than 30 days are summarised. For the dataset-analyzer (EDA) "
+    "workstream, see [memory_eda.md](memory_eda.md) instead._\n\n"
 )
 
 
@@ -78,12 +81,12 @@ def _load_outputs() -> dict:
 
     data: dict = {}
 
-    meta_path = "outputs/run_meta.json"
+    meta_path = "outputs/segmentation/run_meta.json"
     if os.path.exists(meta_path):
         with open(meta_path, encoding="utf-8") as f:
             data.update(json.load(f))
 
-    v1_path = "outputs/v1_subgroups.csv"
+    v1_path = "outputs/segmentation/v1_subgroups.csv"
     if os.path.exists(v1_path):
         v1 = pd.read_csv(v1_path)
         data["segments_found"] = len(v1)
@@ -94,7 +97,7 @@ def _load_outputs() -> dict:
             data["coverage_pct"] = round(float(v1.head(5)["size_pct"].sum()), 1)
         data["v1_rules_evaluated"] = data.get("v1_rules_evaluated", len(v1))
 
-    v2_path = "outputs/v2_stability.csv"
+    v2_path = "outputs/segmentation/v2_stability.csv"
     if os.path.exists(v2_path):
         v2 = pd.read_csv(v2_path)
         stable_n = int(v2["stable"].sum())
@@ -102,7 +105,7 @@ def _load_outputs() -> dict:
         data["stability_pass"] = f"{stable_n}/{total_n}"
         data["unstable_rules"] = v2[~v2["stable"]]["rule"].tolist()
 
-    v3_path = "outputs/v3_drivers.csv"
+    v3_path = "outputs/segmentation/v3_drivers.csv"
     if os.path.exists(v3_path):
         v3 = pd.read_csv(v3_path)
         data["top_drivers"] = v3.head(5)["feature"].tolist() if len(v3) else []
@@ -122,7 +125,7 @@ def _emit(text: str) -> None:
 def action_read(cfg_name: str | None) -> None:
     text = _read_file()
     if not text:
-        _emit("[memory] No memory.md found -- this appears to be the first run.\n")
+        _emit("[memory] No memory_segmentation.md found -- this appears to be the first run.\n")
         return
 
     entries = _parse_entries(text)
@@ -132,7 +135,7 @@ def action_read(cfg_name: str | None) -> None:
     out: list[str] = [
         "",
         "=" * 64,
-        "  PRIOR RUN CONTEXT  (memory.md)",
+        "  PRIOR RUN CONTEXT  (memory_segmentation.md)",
         "=" * 64,
     ]
 

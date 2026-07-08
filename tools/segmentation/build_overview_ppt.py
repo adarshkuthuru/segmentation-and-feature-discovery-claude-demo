@@ -1,6 +1,6 @@
 """
 Build the 2-slide executive overview, styled to match the Zenon 2026 template
-(templates/Zenon_2026_Template.pptx): 10x5.625in canvas, navy/gold palette,
+(docs/templates/Zenon_2026_Template.pptx): 10x5.625in canvas, navy/gold palette,
 white cards with a gold left accent bar, Calibri throughout.
 """
 from pptx import Presentation
@@ -9,8 +9,8 @@ from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 from pptx.oxml.ns import qn
 
-TEMPLATE = "templates/Zenon_2026_Template.pptx"
-OUT = "outputs/Segment_Discovery_Overview_2026-07-01.pptx"
+TEMPLATE = "docs/templates/Zenon_2026_Template.pptx"
+OUT = "outputs/segmentation/Segment_Discovery_Overview_2026-07-01.pptx"
 FONT = "Calibri"
 
 # ── Zenon brand palette (sampled directly from the template) ────────────────
@@ -149,8 +149,8 @@ agnostic_items = [
      "drivers.py — gradient-boosted model + SHAP; confirms rules are "
      "mechanistically grounded, not data artifacts."),
     ("Orchestrator + PPT builder",
-     "run_demo.py chains all stages → outputs/REPORT.md. build_ppt.py generates "
-     "the branded deck. Both are fully data-agnostic."),
+     "run_demo.py chains all stages → outputs/segmentation/REPORT.md. build_ppt.py "
+     "generates the branded deck. Both are fully data-agnostic."),
     ("JSON run spec contract",
      "spec.template.json defines what to provide (target, features, sentinels…) "
      "but never which values. Swap the spec, the rest is unchanged."),

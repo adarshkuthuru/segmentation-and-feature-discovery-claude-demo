@@ -381,6 +381,6 @@ txt(s7, "* Overlap-adjusted estimates. Exact counts depend on which segments are
     6.9, 6.6, 6.1, 0.3, size=8.5, color=MGRAY, italic=True)
 
 # ── Save ─────────────────────────────────────────────────────────────────────
-out = "outputs/Suppression_Segment_Report_2026-07-06.pptx"
+out = "outputs/segmentation/Suppression_Segment_Report_2026-07-06.pptx"
 prs.save(out)
 print(f"Saved -> {out}")

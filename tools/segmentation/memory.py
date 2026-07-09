@@ -22,8 +22,10 @@ sys.path.insert(0, os.path.dirname(__file__))
 from common import load_config
 
 MEMORY_FILE = "memory_segmentation.md"
+CHANGELOG_FILE = "CHANGELOG_segmentation.md"
 CUTOFF_DAYS = 30
 RECENT_SHOW = 3
+CHANGELOG_RECENT = 5  # number of recent changelog entries to surface in action_read
 
 _HEADER = (
     "# Segment Discovery Run Memory\n\n"
@@ -31,6 +33,38 @@ _HEADER = (
     "Entries older than 30 days are summarised. For the dataset-analyzer (EDA) "
     "workstream, see [memory_eda.md](memory_eda.md) instead._\n\n"
 )
+
+
+# ── changelog helpers ─────────────────────────────────────────────────────────
+
+def _changelog_append(entry: str) -> None:
+    """Append a new dated entry block to CHANGELOG_segmentation.md."""
+    p = Path(CHANGELOG_FILE)
+    if p.exists():
+        existing = p.read_text(encoding="utf-8")
+        new_text = existing.rstrip() + "\n\n" + entry.strip() + "\n\n---\n"
+    else:
+        header = (
+            "# Segmentation Pipeline Changelog\n\n"
+            "_Auto-maintained by tools/segmentation/memory.py. "
+            "Read before each run; written after each run._\n\n---\n\n"
+        )
+        new_text = header + entry.strip() + "\n\n---\n"
+    p.write_text(new_text, encoding="utf-8")
+
+
+def _changelog_read_recent() -> str:
+    """Return the last CHANGELOG_RECENT entry blocks from CHANGELOG_segmentation.md."""
+    p = Path(CHANGELOG_FILE)
+    if not p.exists():
+        return "[changelog] No CHANGELOG_segmentation.md found — this appears to be the first run.\n"
+    text = p.read_text(encoding="utf-8")
+    # Split on any --- separator (with optional surrounding whitespace)
+    import re as _re
+    blocks = [b.strip() for b in _re.split(r"\n\s*---\s*\n", text)
+              if b.strip() and not b.strip().startswith("#")]
+    recent = blocks[-CHANGELOG_RECENT:]
+    return "\n\n---\n\n".join(recent)
 
 
 # ── file helpers ──────────────────────────────────────────────────────────────
@@ -75,6 +109,138 @@ def _features_from_rules(rules: list[str]) -> list[str]:
     return out
 
 
+def _rule_to_label(rule: str) -> str:
+    """Convert a pysubgroup rule string into a short human-readable business label."""
+    conditions = [c.strip() for c in rule.split(" AND ")]
+    parts: list[str] = []
+    for cond in conditions:
+        m = re.match(r"FICO: \[(\d+\.?\d*):(\d+\.?\d*)\[", cond)
+        if m:
+            parts.append(f"FICO {int(float(m.group(1)))}–{int(float(m.group(2)))}")
+            continue
+        m = re.match(r"(\w+)==0\.0", cond)
+        if m:
+            feat = m.group(1)
+            tm = re.search(r"_(\d+)$", feat)
+            t = tm.group(1) if tm else "?"
+            if "DQ" in feat:
+                src = "BC" if "BC" in feat else "AL"
+                parts.append(f"Clean {src} DQ {t}mo")
+            elif "INQCNT" in feat:
+                parts.append(f"No Inq {t}mo")
+            else:
+                parts.append(f"{feat}=0")
+            continue
+        m = re.match(r"(\w+): \[(.+?):(.+?)\[", cond)
+        if m:
+            feat, lo_s, hi_s = m.group(1), m.group(2), m.group(3)
+            lo, hi = float(lo_s), float(hi_s)
+            if "BAL" in feat:
+                parts.append(f"${lo/1000:.0f}K–${hi/1000:.0f}K Bal")
+            elif "UTIL" in feat:
+                parts.append(f"Util {int(lo)}–{int(hi)}%")
+            elif "TRDAGE" in feat:
+                parts.append(f"TrdAge {int(lo)}–{int(hi)}mo")
+            elif "INCOME" in feat:
+                parts.append(f"Income ${lo/1000:.0f}K–${hi/1000:.0f}K")
+            else:
+                parts.append(f"{feat} {lo:.0f}–{hi:.0f}")
+    return " + ".join(parts) if parts else rule[:50]
+
+
+def _shap_grounded(rule: str, v3_rank: dict[str, int]) -> str:
+    """Return top-2 SHAP-ranked features appearing in the rule, formatted as FEAT (#rank)."""
+    feats = [f for f in re.findall(r"[A-Z][A-Z0-9_]{2,}", rule) if f not in _RULE_KEYWORDS]
+    ranked = sorted([(f, v3_rank[f]) for f in feats if f in v3_rank], key=lambda x: x[1])
+    return ", ".join(f"{f} (#{r})" for f, r in ranked[:2]) if ranked else "—"
+
+
+def _build_segment_table(v1, v2, v3, bau: float) -> str:
+    """Build a full markdown segment table matching the 2026-07-06 memory format."""
+    import pandas as pd
+
+    v3_rank = {row["feature"]: i + 1 for i, (_, row) in enumerate(v3.iterrows())}
+    wave_cols = [c for c in v2.columns if c.startswith("resp[")]
+    wave_labels = [c[5:-1] for c in wave_cols]  # strip "resp[" and "]"
+
+    merged = v2.merge(
+        v1[["rule", "size", "size_pct", "response_rate", "lift"]],
+        on="rule", how="left",
+    )
+
+    wave_hdr = " | ".join(wave_labels)
+    col_count = 9 + len(wave_cols)
+    lines = [
+        f"| # | Full Rule (pysubgroup) | Business Label | Size | Size% | Overall Rate | {wave_hdr} | Stable | Lift | SHAP-grounded features |",
+        "|" + "|".join(["---"] * col_count) + "|",
+    ]
+    for i, (_, row) in enumerate(merged.iterrows(), 1):
+        rule = row["rule"]
+        size = f"{int(row['size']):,}" if not pd.isna(row.get("size", float("nan"))) else "—"
+        size_pct = f"{float(row['size_pct']):.2f}%" if not pd.isna(row.get("size_pct", float("nan"))) else "—"
+        rate = f"{float(row['response_rate']):.2f}%" if not pd.isna(row.get("response_rate", float("nan"))) else "—"
+        stable = "✓" if row["stable"] else "✗"
+        lift = f"{float(row['overall_lift']):.2f}×"
+        wave_rates = " | ".join(
+            f"{float(row[c]):.2f}%" if c in row.index and not pd.isna(row[c]) else "—"
+            for c in wave_cols
+        )
+        shap_feats = _shap_grounded(rule, v3_rank)
+        label = _rule_to_label(rule)
+        lines.append(
+            f"| {i} | `{rule}` | {label} | {size} | {size_pct} | {rate} | {wave_rates} | {stable} | {lift} | {shap_feats} |"
+        )
+    return "\n".join(lines)
+
+
+def _auto_observations(v1, v2, v3, bau: float) -> list[str]:
+    """Auto-generate key observations from run data for future-run context."""
+    import pandas as pd
+
+    obs: list[str] = []
+    total_rules = len(v2)
+
+    # Feature frequency across stable rules
+    feat_counts: dict[str, int] = {}
+    for rule in v2["rule"]:
+        for feat in re.findall(r"[A-Z][A-Z0-9_]{2,}", rule):
+            if feat not in _RULE_KEYWORDS:
+                feat_counts[feat] = feat_counts.get(feat, 0) + 1
+    frequent = sorted(feat_counts.items(), key=lambda x: -x[1])
+    for feat, cnt in frequent[:3]:
+        if cnt >= 2:
+            obs.append(
+                f"{feat} appears in {cnt}/{total_rules} rules — "
+                f"highly reliable suppression signal; watch for drift if distribution shifts"
+            )
+
+    # Top SHAP driver commentary
+    if len(v3) >= 2:
+        top1, top2 = v3.iloc[0], v3.iloc[1]
+        obs.append(
+            f"{top1['feature']} ({float(top1['mean_abs_shap']):.3f}) is the #1 SHAP driver; "
+            f"{top2['feature']} ({float(top2['mean_abs_shap']):.3f}) is #2"
+        )
+
+    # Wave volatility warnings
+    wave_cols = [c for c in v2.columns if c.startswith("resp[")]
+    if wave_cols:
+        for _, row in v2.iterrows():
+            vals = [float(row[c]) for c in wave_cols if not pd.isna(row.get(c))]
+            if vals and (max(vals) - min(vals)) > 0.08:
+                rule_short = row["rule"][:65] + ("…" if len(row["rule"]) > 65 else "")
+                obs.append(
+                    f"Rule '{rule_short}' has wave spread "
+                    f"{min(vals):.2f}%–{max(vals):.2f}% — monitor if this widens"
+                )
+
+    # Stability pass criterion (always include)
+    obs.append(
+        f"Stability pass criterion: all individual wave rates AND overall rate < BAU ({bau:.2f}%)"
+    )
+    return obs
+
+
 def _load_outputs() -> dict:
     """Read output CSVs + run_meta.json; return memory fields."""
     import pandas as pd
@@ -92,10 +258,14 @@ def _load_outputs() -> dict:
         data["segments_found"] = len(v1)
         if len(v1):
             data["best_lift"] = v1.iloc[0]["lift"]
-            data["top_features"] = _features_from_rules(v1.head(3)["rule"].tolist())
-            # Total unique records covered by top-5 segments (size_pct sum, approximate)
-            data["coverage_pct"] = round(float(v1.head(5)["size_pct"].sum()), 1)
-        data["v1_rules_evaluated"] = data.get("v1_rules_evaluated", len(v1))
+            # BAU from v1 bau column (avoids dependency on run_meta.json)
+            bau = float(v1.iloc[0]["bau"])
+            total_rows_raw = float(v1.iloc[0]["size"]) / (float(v1.iloc[0]["size_pct"]) / 100)
+            total_rows = round(total_rows_raw / 100) * 100  # round to nearest 100
+            data["bau"] = bau
+            data["bau_count"] = round(bau / 100 * total_rows)
+            data["total_rows"] = total_rows
+        data["_v1"] = v1  # private; popped after use in action_write
 
     v2_path = "outputs/segmentation/v2_stability.csv"
     if os.path.exists(v2_path):
@@ -104,11 +274,22 @@ def _load_outputs() -> dict:
         total_n = len(v2)
         data["stability_pass"] = f"{stable_n}/{total_n}"
         data["unstable_rules"] = v2[~v2["stable"]]["rule"].tolist()
+        data["deployed_n"] = stable_n
+        data["_v2"] = v2
+        # Features from stable rules only (matches the quality signal from v2, not all candidates)
+        data["top_features"] = _features_from_rules(v2["rule"].tolist())
 
     v3_path = "outputs/segmentation/v3_drivers.csv"
     if os.path.exists(v3_path):
         v3 = pd.read_csv(v3_path)
-        data["top_drivers"] = v3.head(5)["feature"].tolist() if len(v3) else []
+        if len(v3):
+            top5 = v3.head(5)
+            data["top_drivers"] = top5["feature"].tolist()
+            data["top_drivers_with_values"] = [
+                f"{row['feature']} ({float(row['mean_abs_shap']):.3f})"
+                for _, row in top5.iterrows()
+            ]
+        data["_v3"] = v3
 
     return data
 
@@ -161,6 +342,18 @@ def action_read(cfg_name: str | None) -> None:
 
     out.append("=" * 64)
     out.append("")
+
+    # Also surface recent changelog entries
+    changelog_text = _changelog_read_recent()
+    if changelog_text:
+        out.append("")
+        out.append("=" * 64)
+        out.append(f"  RECENT CHANGELOG  ({CHANGELOG_FILE}, last {CHANGELOG_RECENT} entries)")
+        out.append("=" * 64)
+        out.append(changelog_text)
+        out.append("=" * 64)
+        out.append("")
+
     _emit("\n".join(out))
 
 
@@ -193,40 +386,68 @@ def action_write(cfg: dict) -> None:
 
     outs = _load_outputs()
 
-    row_count = outs.get("row_count", "n/a")
-    base_rate = outs.get("bau", None)
-    bau_str = f"{float(base_rate):.4%}" if base_rate is not None else "n/a"
+    # Pop private DataFrame keys before any serialisation
+    v1 = outs.pop("_v1", None)
+    v2 = outs.pop("_v2", None)
+    v3 = outs.pop("_v3", None)
 
-    segs = outs.get("segments_found", 0)
-    best_lift = outs.get("best_lift", "n/a")
-    coverage = outs.get("coverage_pct", "n/a")
-    coverage_str = f"{coverage}% (top 5 segs)" if isinstance(coverage, (int, float)) else "n/a"
+    # BAU string: "0.41% (410/100,000)"
+    bau = outs.get("bau")
+    bau_count = outs.get("bau_count")
+    total_rows = outs.get("total_rows")
+    if bau is not None and bau_count is not None and total_rows is not None:
+        bau_str = f"{float(bau):.2f}% ({int(bau_count):,}/{int(total_rows):,})"
+    elif bau is not None:
+        bau_str = f"{float(bau):.2f}%"
+    else:
+        bau_str = "n/a"
 
+    # Feature list from ALL top rules
     top_feats = outs.get("top_features", [])
+
+    # "N features | Best lift: Xx | Top N deployed"
+    feature_count = len(cfg.get("feature_columns") or [])
+    best_lift = outs.get("best_lift", "n/a")
+    deployed_n = outs.get("deployed_n", outs.get("stability_pass", "n/a").split("/")[0] if "/" in str(outs.get("stability_pass", "")) else "n/a")
+
     stab = outs.get("stability_pass", "n/a — no time_column")
     unstable = outs.get("unstable_rules", [])
-    top_drivers = outs.get("top_drivers", [])
 
-    # Stage durations from run_meta.json
-    durations = outs.get("stage_durations", {})
-    dur_str = "  |  ".join(f"{k}: {v:.0f}s" for k, v in durations.items()) if durations else "n/a"
+    # SHAP drivers with values
+    top_drivers_with_values = outs.get("top_drivers_with_values", [])
+    top_drivers = outs.get("top_drivers", [])
+    drivers_str = ", ".join(top_drivers_with_values) if top_drivers_with_values else ", ".join(top_drivers) if top_drivers else "n/a"
 
     lines = [
         f"### {now} — {cfg_name}",
-        f"**Data:** {os.path.basename(cfg['data_path'])} | {row_count:,} rows | BAU: {bau_str} | {cfg.get('direction', 'suppression')}" if isinstance(row_count, int) else f"**Data:** {os.path.basename(cfg['data_path'])} | BAU: {bau_str} | {cfg.get('direction', 'suppression')}",
+        f"**Data:** {os.path.basename(cfg['data_path'])} | BAU: {bau_str} | {cfg.get('direction', 'suppression')}",
         f"**Features in top rules:** {', '.join(top_feats) if top_feats else 'n/a'}",
-        f"**Segments found:** {segs} | **Best lift:** {best_lift}x | **List coverage:** {coverage_str}",
-        f"**Stability:** {stab} rules stable" + (f" ({len(unstable)} failed)" if unstable else ""),
+        f"**Segments found (v1):** {feature_count} features | **Best lift:** {best_lift:.3f}x | **Top {deployed_n} deployed**" if isinstance(best_lift, float) else f"**Segments found (v1):** {feature_count} features | **Best lift:** {best_lift}x | **Top {deployed_n} deployed**",
+        f"**Stability:** {stab} rules stable (pass = all wave rates < BAU = {float(bau):.2f}%)" if bau is not None else f"**Stability:** {stab} rules stable",
     ]
     if unstable:
         preview = unstable[:2]
         suffix = " ..." if len(unstable) > 2 else ""
         lines.append(f"**Unstable rules:** {'; '.join(preview)}{suffix}")
-    if top_drivers:
-        lines.append(f"**Top SHAP drivers:** {', '.join(top_drivers)}")
-    lines.append(f"**Stage durations:** {dur_str}")
+    lines.append(f"**Top SHAP drivers:** {drivers_str}")
     lines.append(f"**Config delta vs prior run:** {config_delta}")
     lines.append(f"**Config snapshot:** {json.dumps(cfg_snapshot, separators=(',', ':'))}")
+
+    # Full segment table (requires v1 + v2 + v3 DataFrames)
+    if v1 is not None and v2 is not None and v3 is not None and bau is not None:
+        lines.append("")
+        lines.append(f"**TOP {deployed_n} SUPPRESSION SEGMENTS — full rule text, wave rates, SHAP alignment:**")
+        lines.append("")
+        lines.append(_build_segment_table(v1, v2, v3, float(bau)))
+
+    # Key observations for future runs
+    if v1 is not None and v2 is not None and v3 is not None and bau is not None:
+        obs = _auto_observations(v1, v2, v3, float(bau))
+        if obs:
+            lines.append("")
+            lines.append("**Key observations for future runs:**")
+            for o in obs:
+                lines.append(f"- {o}")
 
     entry_text = "\n".join(lines)
 
@@ -250,6 +471,20 @@ def action_write(cfg: dict) -> None:
 
     _write_file(new_text)
     print(f"[memory] Entry written -> {MEMORY_FILE}  ({cfg_name} @ {now})")
+
+    # Append a lightweight run entry to the changelog
+    data_name = os.path.basename(cfg.get("data_path", "unknown"))
+    segs_summary = f"{deployed_n} stable rules" if deployed_n != "n/a" else stab
+    lift_summary = f"{float(best_lift):.3f}×" if isinstance(best_lift, float) else str(best_lift)
+    changelog_entry = (
+        f"## {now} — {cfg_name} [run]\n\n"
+        f"**Data:** {data_name} | **BAU:** {bau_str} | **Direction:** {cfg.get('direction', 'suppression')}  \n"
+        f"**Config delta:** {config_delta}  \n"
+        f"**Segments:** {segs_summary} | Best lift: {lift_summary}  \n"
+        f"**Outputs:** v0_tree_cuts.csv, v1_subgroups.csv, v2_stability.csv, v3_drivers.csv, REPORT.md"
+    )
+    _changelog_append(changelog_entry)
+    print(f"[memory] Changelog entry written -> {CHANGELOG_FILE}")
 
 
 def action_compact() -> None:
@@ -345,9 +580,21 @@ def action_compact() -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Segment discovery run memory.")
-    ap.add_argument("--action", choices=["read", "write", "compact"], required=True)
+    ap.add_argument("--action", choices=["read", "write", "compact", "changelog"], required=True)
     ap.add_argument("--config", default=None)
     args = ap.parse_args()
+
+    if args.action == "changelog":
+        # Print recent changelog entries (for standalone inspection)
+        text = _changelog_read_recent()
+        _emit(
+            "\n" + "=" * 64 + "\n"
+            f"  RECENT CHANGELOG  ({CHANGELOG_FILE}, last {CHANGELOG_RECENT} entries)\n"
+            + "=" * 64 + "\n"
+            + text + "\n"
+            + "=" * 64 + "\n"
+        )
+        return
 
     if args.action == "read":
         cfg_name = None

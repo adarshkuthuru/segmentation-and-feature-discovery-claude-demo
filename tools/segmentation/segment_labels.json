@@ -1,0 +1,26 @@
+{
+  "EFX_AL_DQOCURNC_5==0.0 AND EFX_BC_DQOCURNC_3==0.0 AND FICO: [664.0:694.0[": {
+    "label": "Clean DQ + FICO 664–694",
+    "criteria": "No 5yr AL DQ + No 3mo BC DQ + FICO 664–694"
+  },
+  "EFX_AL_DQOCURNC_1==0.0 AND EFX_BC_INQCNT_1==0.0 AND EFX_BC_UTIL_1: [16.0:35.0[": {
+    "label": "No Inquiry + Mid-Util 16–35%",
+    "criteria": "No 1mo AL DQ + No BC inquiry (1mo) + BC util 16–35%"
+  },
+  "EFX_BC_DQOCURNC_3==0.0 AND EFX_BC_INQCNT_1==0.0 AND FICO: [664.0:694.0[": {
+    "label": "No BC Inquiry + FICO 664–694",
+    "criteria": "No 3mo BC DQ + No BC inquiry (1mo) + FICO 664–694"
+  },
+  "EFX_BC_DQOCURNC_5==0.0 AND EFX_BC_INQCNT_1==0.0 AND FICO: [694.0:730.0[": {
+    "label": "No Inquiry + FICO 694–730",
+    "criteria": "No 5mo BC DQ + No BC inquiry (1mo) + FICO 694–730"
+  },
+  "EFX_BC_DQOCURNC_3==0.0 AND FICO: [664.0:694.0[": {
+    "label": "Clean BC DQ + FICO 664–694",
+    "criteria": "No 3mo BC DQ + FICO 664–694"
+  },
+  "EFX_AL_BAL_1: [67488.0:135936.0[ AND EFX_AL_DQOCURNC_1==0.0": {
+    "label": "Balance $67.5K–$136K + Clean DQ",
+    "criteria": "Total balance $67.5K–$136K + No 1mo AL DQ"
+  }
+}

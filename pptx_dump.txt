@@ -1,0 +1,118 @@
+slide count: 6
+--- slide 1 ---
+Suppression Segment Discovery
+Credit Card Direct-Mail Campaign  —  Run: 2026-07-09
+✓  Cross-Run Validated — 6 segments confirmed on 3 consecutive runs
+100,000
+Prospects Solicited
+0.41%
+BAU Response Rate
+4 Stages
+Analysis Pipeline
+6 Segments
+Suppression Rules
+Zenon AI  |  Confidential  |  2026-07-09
+--- slide 2 ---
+Executive Summary
+Key findings from this run
+Credit Card Direct-Mail  |  Suppression Segment Discovery  |  Zenon AI
+Slide 2 / 6
+What We Found
+BAU rate: 0.41%
+99.6% of the 100,000 prospects mailed never respond — most mail is wasted.
+6 segments confirmed (3 runs)
+Same 6 multi-feature rules, same thresholds, identical rankings across all runs.
+Rates 0.24–0.28% — up to 42% below BAU
+Top 2 segments alone suppress 21,800 records at 0.24% resp rate.
+All 6 stable across Jan / Feb / Mar 2026
+Every rule stayed below BAU in every wave. Rules 4 & 6: wider spread — monitor.
+0.58×
+Best Suppression Lift
+21,800
+Records Suppressed (Segs 1–2)
+3 Runs
+Cross-Run Validated
+--- slide 3 ---
+Methodology
+Four-stage supervised subgroup discovery pipeline
+Credit Card Direct-Mail  |  Suppression Segment Discovery  |  Zenon AI
+Slide 3 / 6
+V0  ·  EDA + Single-Feature Cuts
+Establish BAU (0.41%).
+Decision-tree cuts on 25 features + FICO + Income.
+New: CURRENT_INCOME $292K–$346K → 0.14× lift
+(n=1,705; too narrow today — explore next run).
+›
+V1  ·  Multi-Feature Subgroup Search
+Beam search over 2–3-condition rules (pysubgroup).
+Ranked by WRAcc. Top 6 rules:
+same as both prior runs. Best lift: 0.58×.
+›
+V2  ·  Stability Validation
+Re-scores each rule within each mail wave.
+All 6 pass: below BAU in Jan, Feb, and Mar 2026.
+Rules 4 & 6 flagged for wider wave spread — monitor.
+›
+V3  ·  Driver Analysis
+Gradient-boost + SHAP on all 25 features.
+Top drivers: BC Util (0.087), Balance (0.084),
+Trade Age (0.057), FICO (0.055).
+Full SHAP rankings in REPORT.md.
+Target: BCP_APPLICATION_ID not null → responded=1  | Sentinels → NaN: 9999997–9999999, 997–999  | Time: TEST_CELL_DROP_DATE (3 waves)
+--- slide 4 ---
+Suppression Segments
+6 multi-feature rules — all below BAU across Jan / Feb / Mar 2026
+Credit Card Direct-Mail  |  Suppression Segment Discovery  |  Zenon AI
+Slide 4 / 6
+✓  Cross-run validated — identical to all prior runs
+TABLE rows: 7 cols: 6
+# | Segment | Plain-English Rule | Size | Rate | Lift
+1 | Clean DQ + FICO 664–694 | No 5yr AL DQ + No 3mo BC DQ + FICO 664–694 | 10,947 | 0.24% | 0.579×
+2 | No Inquiry + Mid-Util 16–35% | No 1mo AL DQ + No BC inquiry (1mo) + BC util 16–35% | 10,881 | 0.24% | 0.583×
+3 | No BC Inquiry + FICO 664–694 | No 3mo BC DQ + No BC inquiry (1mo) + FICO 664–694 | 10,616 | 0.25% | 0.620×
+4 | No Inquiry + FICO 694–730 | No 5mo BC DQ + No BC inquiry (1mo) + FICO 694–730 | 13,060 | 0.26% | 0.635×
+5 | Clean BC DQ + FICO 664–694 | No 3mo BC DQ + FICO 664–694 | 12,939 | 0.26% | 0.641×
+6 | Balance $67.5K–$136K + Clean DQ | Total balance $67.5K–$136K + No 1mo AL DQ | 13,079 | 0.28% | 0.671×
+Lift < 1.0 = suppression.  Lower lift = stronger suppression.  Full technical rules in REPORT.md.
+--- slide 5 ---
+Stability Across Mailing Waves
+Pass criterion: every individual wave rate AND overall rate < BAU (0.41%)
+Credit Card Direct-Mail  |  Suppression Segment Discovery  |  Zenon AI
+Slide 5 / 6
+TABLE rows: 7 cols: 8
+# | Segment | 2026-01 | 2026-02 | 2026-03 | Overall | BAU | Stable?
+1 | Clean DQ + FICO 664–694 | 0.25% | 0.19% | 0.27% | 0.24% | 0.41% | PASS
+2 | No Inquiry + Mid-Util 16–35% | 0.25% | 0.25% | 0.22% | 0.24% | 0.41% | PASS
+3 | No BC Inquiry + FICO 664–694 | 0.28% | 0.23% | 0.25% | 0.25% | 0.41% | PASS
+4 | No Inquiry + FICO 694–730 | 0.30% | 0.20% | 0.28% | 0.26% | 0.41% | PASS
+5 | Clean BC DQ + FICO 664–694 | 0.26% | 0.23% | 0.30% | 0.26% | 0.41% | PASS
+6 | Balance $67.5K–$136K + Clean DQ | 0.33% | 0.29% | 0.21% | 0.28% | 0.41% | PASS
+All 6 / 6 pass.  ⚠ Amber = wider wave spread (>0.08 pct-pt) — monitor.
+--- slide 6 ---
+Recommendations
+Accept / reject decisions and next steps
+Credit Card Direct-Mail  |  Suppression Segment Discovery  |  Zenon AI
+Slide 6 / 6
+1
+Accept Segments 1 & 2  —  Deploy Now
+Suppress 21,800 records/wave at 0.24% rate (42% below BAU). 3 consecutive runs confirmed.
+2
+Accept Segments 3 & 4
+Add ~23,700 records at 0.25–0.26%. Monitor Seg 4 wave spread each cycle.
+3
+Review Segment 5
+Mar 2026 rate 0.30% — closest to BAU. Accept when the next wave confirms the pattern.
+4
+Explore CURRENT_INCOME Band
+v0 cut $292K–$346K shows 0.14× lift (n=1,705). Widen the band for next run.
+Projected Impact
+Segs 1 & 2 only
+21,800 records  ·  0.24% rate
+42% below BAU
+Segs 1–4
+~35,000 records  ·  0.25% rate
+39% below BAU
+All 6 segments
+~48,000 records  ·  0.26% rate
+37% below BAU
+* Overlap-adjusted estimates. Savings at $0.75–$1.50/piece.

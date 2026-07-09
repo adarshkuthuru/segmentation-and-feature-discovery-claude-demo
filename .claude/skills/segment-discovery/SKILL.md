@@ -78,16 +78,55 @@ Figure it out, propose, confirm, then proceed:
 
 ## Workflow (run in order; narrate after each, numbers come from the CSVs)
 
-### Before running stages — read memory context
-Run `python tools/segmentation/memory.py --action read --config config.json`
-(or wait for `run_demo.py` to print it automatically, if present). Use what you see to:
+### Before starting — read project documentation and context
+
+Read these files at the project root **before** running any pipeline stage:
+
+1. **`README.md`** — current directory structure, run commands, and conventions.
+   Use this to verify file paths, understand what scripts exist, and catch any
+   structural changes since the last session.
+2. **`CHANGELOG_segmentation.md`** — recent additions, deletions, and modifications
+   to the segmentation pipeline. Surfaced automatically when you run the memory
+   command below; also readable directly if you want only the changelog.
+3. Run `python tools/segmentation/memory.py --action read --config config.json`
+   — prints recent run memory (BAU, rules, SHAP) **and** the last 5 changelog
+   entries in one pass.
+
+Use what you see to:
+- Verify the scripts and paths in README.md match what actually exists before running.
 - Call out features that were **reliable in prior runs** (cross-run signal = higher confidence).
-- Warn if a rule in the current results resembles an **unstable rule from a prior run**.
-- Flag if the current BAU or best lift **deviates materially** from the typical range (possible
-  data drift or config change).
-- Note any **high-null features** flagged before, so the analyst isn't surprised again.
+- Warn if a rule resembles an **unstable rule from a prior run**.
+- Flag if BAU or best lift **deviates materially** from the typical range.
+- Note any high-null features flagged before.
+- Flag recent structural changes that might affect this run.
 
 ---
+
+### Before running the stages — archive prior outputs, then enforce retention
+
+Before any stage overwrites `outputs/segmentation/`, copy the current
+`v0_tree_cuts.csv`, `v1_subgroups.csv`, `v2_stability.csv`, `v3_drivers.csv`,
+`REPORT.md`, and the current `.pptx` deck into `archives/` with a
+`_archived_<today's date>` suffix on each filename (flat files, no
+per-date subdirectories — that is the wrong convention; see below).
+
+**Retention cap: keep only the 30 most recent archived run-dates in
+`archives/`, discard the rest.**
+
+1. List everything in `archives/` and extract the run-date from each entry:
+   - flat files use the `_archived_YYYY-MM-DD` suffix in the filename.
+   - any legacy per-date subdirectory (e.g. `archives/2026-07-06/`) counts as
+     one run-date too — flatten it into the standard file-suffix convention
+     while you're at it, since a subdirectory is stale-convention clutter.
+2. Collect the **distinct** run-dates represented, sort descending (newest
+   first).
+3. If there are more than 30 distinct dates, delete every file (and any
+   leftover legacy subdirectory) whose run-date falls outside the 30 most
+   recent — do this **before** copying today's outputs in, so today's run
+   never gets pruned.
+4. Note what was pruned (dates removed, file count) in the
+   `CHANGELOG_segmentation.md` entry for this session, e.g.
+   `Archive retention: pruned N files older than the 30 most recent runs.`
 
 1. **EDA & one-feature cuts** — `python tools/segmentation/tree_cuts.py [--config ...]`
    Establish BAU; show single-feature thresholds. Note single features are
@@ -103,6 +142,39 @@ Run `python tools/segmentation/memory.py --action read --config config.json`
 5. **Report** — write ranked, validated segments + a business headline to
    `outputs/segmentation/REPORT.md` (via `run_demo.py` if present, else compile
    directly from the stage CSVs).
+
+### After completing — update memory, changelog, and README
+
+**Always run:**
+```
+python tools/segmentation/memory.py --action write --config config.json
+```
+This writes the full run entry to `memory_segmentation.md` **and** appends a
+lightweight run entry to `CHANGELOG_segmentation.md` automatically.
+
+**If structural changes were made** during this session (new files, deleted files,
+modified scripts, config edits, new outputs added to the directory tree), do **all three**:
+
+1. Append a `[structural]` entry to `CHANGELOG_segmentation.md`:
+   ```
+   ## YYYY-MM-DD HH:MM — [brief title] [structural]
+
+   ### Added
+   - `path/to/file` — one-line description
+
+   ### Deleted
+   - `path/to/file` — reason
+
+   ### Modified
+   - `path/to/file` — what changed and why
+   ```
+
+2. Update `README.md` to reflect the change — specifically the directory tree,
+   the "Run it" commands, or the "Output & archiving convention" section if any
+   of those are now out of date.
+
+3. Verify `README.md` is consistent with what actually exists on disk (directory
+   tree, file names, run commands) before ending the session.
 
 ## Rules of engagement
 - **Never invent statistics** — read the tool's CSV in `outputs/segmentation/`, then narrate.

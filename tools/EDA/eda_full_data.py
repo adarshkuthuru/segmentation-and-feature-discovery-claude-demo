@@ -179,7 +179,7 @@ before modeling.
    zeros or extreme values.
 3. Plan for extreme class imbalance in modeling (resampling, class weights, or
    ranking-style metrics such as AUC/lift rather than accuracy).
-4. Drop the six leakage/ID columns from any feature set used for modeling.
+4. Drop the seven leakage/ID columns from any feature set used for modeling.
 """)
 
 w("## Phase 1 — Business & Data Understanding")
@@ -234,8 +234,11 @@ w("### 4. Duplicate Records")
 dup_count = df.is_duplicated().sum()
 w(f"- Full-row duplicates: **{dup_count}** ({pct(dup_count):.3f}%)")
 id_dupe = df.select(pl.col("ACCT_ID").is_not_null()).to_series().sum()
-w(f"- `ACCT_ID` is populated for {id_dupe:,} rows (existing Capital One customers "
-  f"mixed into the prospect file); all other rows are null (new prospects), which is expected, not a defect.")
+acct_unique = df["ACCT_ID"].n_unique()
+w(f"- `ACCT_ID` is populated for all {id_dupe:,} rows (a per-record identifier, not a "
+  f"customer-tenure flag) with {acct_unique:,} distinct values — {id_dupe - acct_unique} fewer "
+  f"than the row count, implying a small number of rows share an `ACCT_ID`; worth a quick "
+  f"follow-up with the source system, not a blocking issue.")
 w()
 
 w("### 5. Missing Value Analysis (post-sentinel-cleaning)")
@@ -586,7 +589,7 @@ fig, axes = plt.subplots(2, 3, figsize=(16, 9))
 biv_df = df_clean.select(biv_cols + ["responded"]).to_pandas()
 for ax, c in zip(axes.flat, biv_cols):
     data = [biv_df.loc[biv_df.responded == r, c].dropna() for r in [0, 1]]
-    ax.boxplot(data, labels=["No response", "Responded"], showfliers=False)
+    ax.boxplot(data, tick_labels=["No response", "Responded"], showfliers=False)
     ax.set_title(c, fontsize=10)
 plt.suptitle("Feature distributions by response outcome (outliers hidden for scale)")
 plt.tight_layout()

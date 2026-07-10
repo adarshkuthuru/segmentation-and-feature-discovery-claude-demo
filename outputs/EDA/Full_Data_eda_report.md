@@ -25,7 +25,7 @@ before modeling.
    zeros or extreme values.
 3. Plan for extreme class imbalance in modeling (resampling, class weights, or
    ranking-style metrics such as AUC/lift rather than accuracy).
-4. Drop the six leakage/ID columns from any feature set used for modeling.
+4. Drop the seven leakage/ID columns from any feature set used for modeling.
 
 ## Phase 1 — Business & Data Understanding
 
@@ -155,7 +155,7 @@ raw/derived campaign fields, not bureau attributes.
 
 ### 4. Duplicate Records
 - Full-row duplicates: **0** (0.000%)
-- `ACCT_ID` is populated for 100,000 rows (existing Capital One customers mixed into the prospect file); all other rows are null (new prospects), which is expected, not a defect.
+- `ACCT_ID` is populated for all 100,000 rows (a per-record identifier, not a customer-tenure flag) with 99,973 distinct values — 27 fewer than the row count, implying a small number of rows share an `ACCT_ID`; worth a quick follow-up with the source system, not a blocking issue.
 
 ### 5. Missing Value Analysis (post-sentinel-cleaning)
 

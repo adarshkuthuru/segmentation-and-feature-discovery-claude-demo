@@ -86,7 +86,17 @@
       "PowerShell(node --version)",
       "PowerShell(npm list -g pptxgenjs 2>&1)",
       "Bash(cat \"C:\\\\Users\\\\AdarshKuthuru\\\\.claude\\\\scheduled-tasks\\\\segmentation_demo\\\\SKILL.md\" | grep -A5 -B5 \"build_ppt\\\\|ppt\\\\|PPT\\\\|outputs\" | head -60)",
-      "Bash(grep -n -i -E \"archiv|copy|prior.{0,20}\\(output|run\\)|before.{0,15}overwrit\" .claude/skills/segment-discovery/SKILL.md)"
+      "Bash(grep -n -i -E \"archiv|copy|prior.{0,20}\\(output|run\\)|before.{0,15}overwrit\" .claude/skills/segment-discovery/SKILL.md)",
+      "Bash(python eda_full_data.py)",
+      "Bash(python make_exec_deck_full_data.py)",
+      "Bash(tasklist)",
+      "Read(//c/Users/MohanKrishnaGupta/.claude/skills/dataset-analyzer/**)",
+      "Read(//c/Users/MohanKrishnaGupta/.claude/skills/**)",
+      "Bash(ls /c/Windows/Fonts/ 2>/dev/null | grep -i arial; ls /c/Windows/Fonts/ 2>/dev/null | grep -i calibri)",
+      "Bash(mkdir -p /tmp/tpl_extract)",
+      "Bash(PYTHONIOENCODING=utf-8 python -c ' *)",
+      "Bash(cat /c/tmp_slide_check.txt)",
+      "Read(//c//**)"
     ]
   }
 }

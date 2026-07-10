@@ -275,6 +275,9 @@ skill, reusing the charts in `output/figures/`. Write it to `output/<dataset>_ex
   7. Recommended next steps — what this enables.
 - Numbers must match the report exactly (derive the deck from the finalized report, do not recompute).
 
+Review the formatting of each slide and verify that all inserted figures are properly positioned within the slide boundaries. Ensure that no images, charts, or other visual elements extend beyond the slide's edges or are cut off.
+
+
 ## Edge cases
 
 - File unreadable → report the error clearly and suggest checking path/format.

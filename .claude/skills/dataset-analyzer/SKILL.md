@@ -16,24 +16,13 @@ description: >
 
 Perform a professional, checklist-driven exploratory analysis of any tabular dataset using **Python** and
 the **Polars** library, with charts via **matplotlib/seaborn**. The methodology follows a 20-item, 5-phase
-standard. Analysis scripts live in `tools/EDA/`; the final deliverables are written to `outputs/EDA/`:
+standard. The final deliverables are:
 
-1. `outputs/EDA/<dataset>_eda_report.md` — the full report, with embedded charts.
-2. `outputs/EDA/figures/*.png` — every chart referenced by the report.
-3. `outputs/EDA/<dataset>_executive_summary.pptx` — a short, non-technical deck for executives.
-   If `docs/templates/` contains a branded template (e.g. `Zenon_2026_Template.pptx`), build the deck on
-   top of it for visual consistency with other deliverables; otherwise fall back to a clean default theme.
+1. `output/<dataset>_eda_report.md` — the full report, with embedded charts.
+2. `output/figures/*.png` — every chart referenced by the report.
+3. `output/<dataset>_executive_summary.pptx` — a short, non-technical deck for executives.
 
 After the report is written, an optional **eda-reviewer** pass audits it for completeness and quality.
-
-## Cross-run memory
-
-This workstream keeps its own memory file, `memory_eda.md` at the project root — separate from the
-`segment-discovery` skill's `memory_segmentation.md`. Before starting, check whether `memory_eda.md` exists
-and skim its most recent entry for prior findings on the same dataset (data-quality issues already known,
-sentinel codes already confirmed, etc.). After finishing, append a short entry: date, dataset + row/column
-count, target/derivation if any, the most important quality finding, and where the artifacts were written.
-Keep entries terse — this is a lookup aid for future runs, not a duplicate of the report.
 
 ## Setup
 
@@ -62,11 +51,9 @@ If a plotting library is unavailable, still produce the numeric report and note 
 
 ## Artifacts & conventions
 
-- Report: `outputs/EDA/<dataset>_eda_report.md`. Charts: `outputs/EDA/figures/<name>.png`, referenced with
-  **relative** links so they resolve from the report's location, e.g.
-  `![Correlation heatmap](figures/corr_heatmap.png)`.
-- Create both `outputs/EDA/` and `outputs/EDA/figures/` up front
-  (`Path(...).mkdir(parents=True, exist_ok=True)`).
+- Report: `output/<dataset>_eda_report.md`. Charts: `output/figures/<name>.png`, referenced with **relative**
+  links so they resolve from the report's location, e.g. `![Correlation heatmap](figures/corr_heatmap.png)`.
+- Create both `output/` and `output/figures/` up front (`Path(...).mkdir(parents=True, exist_ok=True)`).
 - On Windows, write the report as UTF-8 (`open(path, "w", encoding="utf-8")`) and, if you also print to the
   console, reconfigure stdout to UTF-8 (`sys.stdout.reconfigure(encoding="utf-8")`) so emoji/box glyphs do
   not crash under cp1252.
@@ -223,19 +210,18 @@ When a Phase 5 item does not apply, still print its header with "Not applicable 
 ## Final step: Executive deck (`.pptx`)
 
 After the report is finalized, generate a short **non-technical** deck with the `anthropic-skills:pptx`
-skill, reusing the charts in `outputs/EDA/figures/`. Write it to
-`outputs/EDA/<dataset>_executive_summary.pptx`. If a branded template exists under `docs/templates/`,
-build on top of it instead of a blank deck.
+skill, reusing the charts in `output/figures/`. Write it to `output/<dataset>_executive_summary.pptx`.
 
 - **Audience:** executives. No jargon — avoid "kurtosis", "Z-score", "cardinality", "multicollinearity".
   Translate to plain business language ("a few unusually large values", "these two measurements say the same
   thing").
 - **Every slide leads with a takeaway**, not a statistic. Keep it to ~6-8 slides:
   1. Title — dataset, purpose, date.
-  2. What this data is — one line + grain.
-  3. Data health at a glance — clean? completeness %, duplicates, red flags (traffic-light style).
-  4. What the data looks like — 1-2 key charts with a plain caption.
-  5. Key relationships — the main correlation/pattern in one sentence.
+  2. What this data is: Dataset Shape & Structure.
+  3. A slide for the Phase 2: Data Quality Checks.
+  4. Slide for the Phase 3 — Univariate & Distribution Analysis
+  5. Slide for the Phase 4 — Relationship & Target Analysis
+  6. Optional Slide (if applicable) for Phase 5 — Segment, Time & Specialized Analysis (gated)
   6. Issues to address before modeling — the cleanup list in business terms.
   7. Recommended next steps — what this enables.
 - Numbers must match the report exactly (derive the deck from the finalized report, do not recompute).

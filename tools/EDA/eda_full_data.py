@@ -586,7 +586,7 @@ fig, axes = plt.subplots(2, 3, figsize=(16, 9))
 biv_df = df_clean.select(biv_cols + ["responded"]).to_pandas()
 for ax, c in zip(axes.flat, biv_cols):
     data = [biv_df.loc[biv_df.responded == r, c].dropna() for r in [0, 1]]
-    ax.boxplot(data, labels=["No response", "Responded"], showfliers=False)
+    ax.boxplot(data, tick_labels=["No response", "Responded"], showfliers=False)
     ax.set_title(c, fontsize=10)
 plt.suptitle("Feature distributions by response outcome (outliers hidden for scale)")
 plt.tight_layout()

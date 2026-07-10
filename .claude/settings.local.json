@@ -62,7 +62,31 @@
       "Bash(python tools/EDA/eda_full_data.py)",
       "Bash(python tools/EDA/make_exec_deck_full_data.py)",
       "Bash(git mv *)",
-      "Bash(mv memory.md memory_segmentation.md)"
+      "Bash(mv memory.md memory_segmentation.md)",
+      "Bash(python tools/segmentation/memory.py --action read --config config.json)",
+      "Bash(python tools/segmentation/tree_cuts.py --config config.json)",
+      "Bash(python tools/segmentation/subgroup_search.py --config config.json)",
+      "Bash(python tools/segmentation/stability.py --config config.json)",
+      "Bash(python tools/segmentation/drivers.py --config config.json)",
+      "Bash(python -c \"from pptx import Presentation; print\\('pptx ok'\\)\")",
+      "Bash(python tools/segmentation/build_ppt_2026_07_09.py)",
+      "Bash(python tools/segmentation/build_ppt.py *)",
+      "Bash(python tools/segmentation/build_ppt.py)",
+      "Bash(python tools/segmentation/memory.py --action compact --config config.json)",
+      "Bash(python tools/segmentation/memory.py --action write --config config.json)",
+      "Bash(python tools/segmentation/memory.py --action changelog --config config.json)",
+      "Bash(python tools/segmentation/memory.py --action changelog)",
+      "Bash(python \".claude/skills/anthropic-skills:pptx/scripts/office/soffice.py\" --headless --convert-to pdf \"outputs/segmentation/Suppression_Segment_Report_2026-07-09.pptx\")",
+      "Bash(python -c \"import subprocess; r = subprocess.run\\(['soffice', '--version'], capture_output=True, text=True\\); print\\(r.stdout, r.stderr\\)\")",
+      "Bash(cp tools/segmentation/build_ppt_2026_07_09.py tools/segmentation/build_ppt_2026_07_09_r3.py)",
+      "Bash(sed -i 's/Run: 2026-07-09/Run 3: 2026-07-09/g; s/2nd consecutive run/3rd consecutive run/g; s/Consecutive Cross-Validation/Consecutive Runs Validated/g; s/confirmed on 2nd consecutive run \\(vs 2026-07-06\\)/confirmed on 3 consecutive runs \\(07-06, 07-09 \\\\xd71, 07-09 \\\\xd72\\)/g; s/Slide 2 of 7/Slide 2 of 7/g; s/Suppression_Segment_Report_2026-07-09.pptx/Suppression_Segment_Report_2026-07-09_r3.pptx/g' tools/segmentation/build_ppt_2026_07_09_r3.py)",
+      "Bash(python tools/segmentation/build_ppt_2026_07_09_r3.py)",
+      "Bash(python \"C:\\\\Users\\\\AdarshKuthuru\\\\AppData\\\\Roaming\\\\Claude\\\\local-agent-mode-sessions\\\\skills-plugin\\\\7bfefc8c-6fb9-48ba-b804-9b57cb542a82\\\\0448c3e2-bec5-49c5-ad63-c79ab8556ab0\\\\skills\\\\pptx\\\\scripts\\\\office\\\\soffice.py\" --headless --convert-to pdf \"outputs/segmentation/Suppression_Segment_Report_2026-07-09.pptx\")",
+      "Bash(npm list *)",
+      "PowerShell(node --version)",
+      "PowerShell(npm list -g pptxgenjs 2>&1)",
+      "Bash(cat \"C:\\\\Users\\\\AdarshKuthuru\\\\.claude\\\\scheduled-tasks\\\\segmentation_demo\\\\SKILL.md\" | grep -A5 -B5 \"build_ppt\\\\|ppt\\\\|PPT\\\\|outputs\" | head -60)",
+      "Bash(grep -n -i -E \"archiv|copy|prior.{0,20}\\(output|run\\)|before.{0,15}overwrit\" .claude/skills/segment-discovery/SKILL.md)"
     ]
   }
 }

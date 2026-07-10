@@ -24,11 +24,13 @@ segmentation-and-feature-discovery-claude-demo/
 ├── spec.template.json                 # annotated run-spec template — copy this for a new dataset
 ├── memory_segmentation.md             # auto-maintained cross-run memory (tools/segmentation/memory.py)
 ├── memory_eda.md                      # cross-run memory for the dataset-analyzer (EDA) workstream
+├── CHANGELOG_segmentation.md          # timestamped log of all segmentation pipeline changes + run events
+├── CHANGELOG_EDA.md                   # timestamped log of all EDA workstream changes + run events
 │
 ├── docs/
 │   ├── SOLUTION_LANDSCAPE.md          # build-vs-buy / tooling research
 │   ├── Segment Discovery Demo steps.docx   # live demo walkthrough
-│   └── templates/                     # Zenon brand assets used by the PPT builders
+│   └── templates/                     # Zenon brand assets
 │       ├── Zenon_2026_Template.pptx
 │       └── Zenon Logo.PNG
 │
@@ -40,10 +42,10 @@ segmentation-and-feature-discovery-claude-demo/
 │   │   ├── stability.py               # v2 stability across a time/cohort column
 │   │   ├── drivers.py                 # v3 SHAP driver analysis
 │   │   ├── memory.py                  # reads/writes memory_segmentation.md across runs
-│   │   ├── build_ppt_2026_07_06.py    # branded executive PPT builder (segment-discovery results)
-│   │   └── build_overview_ppt.py      # 2-slide overview deck builder
+│   │   ├── build_ppt.py               # canonical executive PPT builder (6-slide deck)
+│   │   └── segment_labels.json        # business labels for known segment rules
 │   └── EDA/                           # generic 5-phase/20-item EDA (dataset-agnostic)
-│       ├── eda_full_data.py           # EDA executor — runs on the full dataset, no subsampling
+│       ├── eda_full_data.py           # EDA executor — runs on the full dataset
 │       └── make_exec_deck_full_data.py    # non-technical exec deck for the full dataset
 │
 ├── data/
@@ -52,7 +54,7 @@ segmentation-and-feature-discovery-claude-demo/
 │
 ├── outputs/
 │   ├── EDA/                           # dataset-analyzer artifacts: report, figures, exec deck
-│   └── segmentation/                  # segment-discovery artifacts: v0-v3 CSVs, REPORT.md, .pptx decks
+│   └── segmentation/                  # segment-discovery artifacts: v0-v3 CSVs, REPORT.md, .pptx deck
 │
 ├── archives/                          # date-stamped copies of prior outputs (archived before overwrite)
 │
@@ -73,20 +75,26 @@ the 0/1 target**, `direction` (suppression vs targeting), which columns are IDs 
 
 ## Setup
 ```bash
-pip install pandas scikit-learn pysubgroup shap openpyxl
+pip install pandas scikit-learn pysubgroup shap openpyxl python-pptx
 ```
 
 ## Run it (deterministic, no LLM)
 Run each stage against the active spec, in order:
 ```bash
 python tools/segmentation/tree_cuts.py --config config.json          # v0: EDA + single-feature cuts
-python tools/segmentation/subgroup_search.py --config config.json    # v1: multi-feature rules (the money shot)
+python tools/segmentation/subgroup_search.py --config config.json    # v1: multi-feature rules
 python tools/segmentation/stability.py --config config.json          # v2: stability across time windows
 python tools/segmentation/drivers.py --config config.json            # v3: SHAP driver analysis
-python tools/segmentation/memory.py --action read --config config.json   # cross-run memory context
+python tools/segmentation/memory.py --action read --config config.json   # cross-run memory + changelog context
+python tools/segmentation/memory.py --action changelog                   # view changelog only
 ```
 Each stage writes its result to `outputs/segmentation/v0_tree_cuts.csv` …
 `outputs/segmentation/v3_drivers.csv`.
+
+Build the executive deck from the latest results:
+```bash
+python tools/segmentation/build_ppt.py --run-count <N>
+```
 
 ## Run it agentically (the actual demo)
 Open this folder in **Claude Code** and either give the details or let it figure
@@ -118,17 +126,19 @@ Path B = cold start with research).
 modeled features to avoid redundant tri-bureau triplets; stability checked across
 3 mailing waves (`TEST_CELL_DROP_DATE`: 2026-01-06, 2026-02-10, 2026-03-10).
 
-Top rule found: `EFX_AL_DQOCURNC_5==0 AND EFX_BC_DQOCURNC_3==0 AND FICO∈[664,694)`
-→ 10,947 prospects (10.95%), 0.24% response (0.58× lift vs BAU), stable across
-all 3 waves. See [`outputs/segmentation/REPORT.md`](outputs/segmentation/REPORT.md)
-for the full ranked list and SHAP drivers.
+**Results (confirmed on 3 consecutive runs):** Top rule: `EFX_AL_DQOCURNC_5==0 AND
+EFX_BC_DQOCURNC_3==0 AND FICO∈[664,694)` → 10,947 prospects (10.95%), 0.24%
+response rate (0.58× lift vs BAU), stable in every wave. Suppressing the top 2
+segments removes ~21,800 records (21.9% of mail) at 0.24% response — 42% below
+BAU. See [`outputs/segmentation/REPORT.md`](outputs/segmentation/REPORT.md) for
+the full ranked list and SHAP drivers.
 
 ## Skills available
 
 | Skill | Role | Purpose |
 |---|---|---|
 | [`segment-discovery`](.claude/skills/segment-discovery/SKILL.md) | Executor | Runs the v0→v3 pipeline; inspects data, writes the run spec, narrates ranked segment rules |
-| [`segment-discovery-reviewer`](.claude/skills/segment-discovery-reviewer/SKILL.md) | Reviewer | Independent QA pass — cross-checks artifacts (spec, CSVs, REPORT, PPT, memory) for quality and accuracy without recomputing |
+| [`segment-discovery-reviewer`](.claude/skills/segment-discovery-reviewer/SKILL.md) | Reviewer | Independent QA pass — cross-checks artifacts (spec, CSVs, REPORT, PPT, memory) for quality and accuracy |
 | [`dataset-analyzer`](.claude/skills/dataset-analyzer/SKILL.md) | Executor | General-purpose 5-phase/20-item EDA on any tabular dataset (Polars); produces a report + executive deck |
 | [`eda-reviewer`](.claude/skills/eda-reviewer/SKILL.md) | Reviewer | Audits a `dataset-analyzer` report for completeness, internal consistency, and actionability |
 | [`business-writing-and-advisory`](.claude/skills/business-writing-and-advisory/SKILL.md) | Support | Turns rough analysis into business-first, client-ready slide language, memos, and stakeholder writing |
@@ -139,19 +149,27 @@ accuracy — neither re-runs the other's work end-to-end.
 
 ## Output & archiving convention
 
-- `outputs/segmentation/` holds the **current** segment-discovery run's
-  artifacts: `v0_tree_cuts.csv` … `v3_drivers.csv`, `REPORT.md`, and the
-  executive `.pptx` decks.
+- `outputs/segmentation/` holds the **current** run's artifacts: `v0_tree_cuts.csv`
+  … `v3_drivers.csv`, `REPORT.md`, and the executive `.pptx` deck.
 - `outputs/EDA/` holds the `dataset-analyzer` skill's artifacts: the EDA report,
   its figures, and the non-technical executive deck.
 - Before a new run overwrites `outputs/segmentation/`, prior artifacts are
-  copied to `archives/<YYYY-MM-DD>/` so run history is never silently lost.
-- `memory_segmentation.md` is auto-maintained by `tools/segmentation/memory.py` and persists
-  cross-run signal: which features were reliable, which rules were stable, and
-  how BAU/lift compare to prior runs — read this before starting a new run.
-- PPT decks (`tools/segmentation/build_ppt_2026_07_06.py`,
-  `tools/segmentation/build_overview_ppt.py`) are built on the Zenon brand
-  template in `docs/templates/Zenon_2026_Template.pptx`.
+  copied to `archives/` (date-stamped filenames, flat — no per-date
+  subdirectories) so run history is never lost.
+- `archives/` retains only the **30 most recent run-dates**; older ones are
+  pruned automatically as part of the archiving step, and the prune is noted
+  in `CHANGELOG_segmentation.md`.
+- `memory_segmentation.md` is auto-maintained by `tools/segmentation/memory.py` and
+  persists cross-run signal: which features were reliable, which rules were stable,
+  and how BAU/lift compare to prior runs.
+- `CHANGELOG_segmentation.md` is auto-updated by `memory.py --action write` for each
+  run, and manually extended by Claude for structural changes (new files, deletions,
+  code modifications). Read it alongside memory before each new run.
+- `CHANGELOG_EDA.md` is the equivalent for the EDA workstream — appended after each
+  EDA run and after any tool/script changes.
+- The executive PPT is built by `tools/segmentation/build_ppt.py` (canonical,
+  6-slide deck). Business labels for known segment rules live in
+  `tools/segmentation/segment_labels.json` — update this file when rules change.
 
 ## Notes
 - See [`docs/SOLUTION_LANDSCAPE.md`](docs/SOLUTION_LANDSCAPE.md) for the

@@ -24,6 +24,55 @@ standard. The final deliverables are:
 
 After the report is written, an optional **eda-reviewer** pass audits it for completeness and quality.
 
+## Cross-run memory and changelog
+
+### Before starting — read project documentation and context
+
+Read these files at the project root **before** running any analysis:
+
+1. **`README.md`** — current directory structure, tool locations, and conventions.
+   Use this to verify EDA script paths and understand what templates exist.
+2. **`CHANGELOG_EDA.md`** — recent additions, deletions, and modifications to the
+   EDA workstream (scripts, templates, tool updates). Read this to catch any changes
+   since the last session before writing new code or running existing scripts.
+3. **`memory_eda.md`** — prior run findings for the same dataset (data-quality issues
+   already known, sentinel codes confirmed, key structural findings). Skim the most
+   recent entry.
+
+### After completing — update memory, changelog, and README
+
+**Always append to `memory_eda.md`:** date, dataset + row/column count,
+target/derivation if any, the most important quality finding, where the artifacts
+were written. Terse — this is a lookup aid, not a duplicate of the report.
+
+**Always append a run entry to `CHANGELOG_EDA.md`:**
+```
+## YYYY-MM-DD — [dataset name] [run]
+
+**Dataset:** path/to/file (N rows × M columns)
+**Target (derived):** [how target was derived and base rate]
+**Key finding:** [single most important quality or structural finding]
+**Outputs:** [list of files written]
+```
+
+**If structural changes were made** (new scripts, deleted files, modified tools,
+new templates), do **all three**:
+
+1. Append a `[structural]` entry to `CHANGELOG_EDA.md`:
+   ```
+   ## YYYY-MM-DD — [brief title] [structural]
+
+   ### Added / Deleted / Modified
+   - `path/to/file` — description
+   ```
+
+2. Update `README.md` to reflect the change — specifically the directory tree or
+   the "Skills available" / "Output & archiving convention" sections if any of
+   those are now out of date.
+
+3. Verify `README.md` is consistent with what actually exists on disk (file names,
+   tool paths, script names) before ending the session.
+
 ## Setup
 
 Install the core and plotting libraries. Excel and time-series diagnostics are optional extras:

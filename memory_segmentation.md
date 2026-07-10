@@ -34,3 +34,65 @@ workstream, see [memory_eda.md](memory_eda.md) instead._
 - Stability pass criterion: all individual wave rates AND overall rate < BAU (0.41%)
 
 ---
+
+### 2026-07-09 14:22 — capital_one_dm_suppression
+**Data:** Sample_Data.csv | BAU: 0.41% (410/100,000) | suppression
+**Features in top rules:** EFX_AL_DQOCURNC_5, EFX_BC_DQOCURNC_3, FICO, EFX_AL_DQOCURNC_1, EFX_BC_INQCNT_1, EFX_BC_UTIL_1, EFX_BC_DQOCURNC_5, EFX_AL_BAL_1
+**Segments found (v1):** 25 features | **Best lift:** 0.579x | **Top 6 deployed**
+**Stability:** 6/6 rules stable (pass = all wave rates < BAU = 0.41%)
+**Top SHAP drivers:** EFX_BC_UTIL_1 (0.087), EFX_AL_BAL_1 (0.084), EFX_AL_TRDAGE_1 (0.057), FICO (0.055), EFX_AL_DQOCURNC_3 (0.050)
+**Config delta vs prior run:** unchanged
+**Config snapshot:** {"feature_columns":["FICO","CURRENT_INCOME","EFX_AL_BAL_1","EFX_BC_BAL_1","EFX_BC_BAL_5","EFX_AR_BAL_1","EFX_AL_TRDCNT_1","EFX_BC_TRDCNT_1","EFX_BC_TRDCNT_4","EFX_AL_TRDCNT_5","EFX_BC_TRDCNT_5","EFX_AL_TRDAGE_1","EFX_BC_TRDAGE_1","EFX_BC_TRDAGE_2","EFX_BC_TRDAGE_3","EFX_BC_INQCNT_1","EFX_BC_INQCNT_2","EFX_BC_INQCNT_4","EFX_AL_DQOCURNC_1","EFX_AL_DQOCURNC_2","EFX_AL_DQOCURNC_3","EFX_BC_DQOCURNC_3","EFX_AL_DQOCURNC_5","EFX_BC_DQOCURNC_5","EFX_BC_UTIL_1"],"time_column":"TEST_CELL_DROP_DATE","min_segment_pct":1.0,"direction":"suppression","exclude_columns":["BCP_ACCOUNT_ID","BCP_APPLICATION_ID","BCP_APPLICATION_RECEIVED_DATE","PV","SOLICITATION_ID","TEST_CELL_DROP_DATE"]}
+
+**TOP 6 SUPPRESSION SEGMENTS — full rule text, wave rates, SHAP alignment:**
+
+| # | Full Rule (pysubgroup) | Business Label | Size | Size% | Overall Rate | 2026-01-06 | 2026-02-10 | 2026-03-10 | Stable | Lift | SHAP-grounded features |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | `EFX_AL_DQOCURNC_5==0.0 AND EFX_BC_DQOCURNC_3==0.0 AND FICO: [664.0:694.0[` | Clean AL DQ 5mo + Clean BC DQ 3mo + FICO 664–694 | 10,947 | 10.95% | 0.24% | 0.25% | 0.19% | 0.27% | ✓ | 0.58× | FICO (#4), EFX_BC_DQOCURNC_3 (#21) |
+| 2 | `EFX_AL_DQOCURNC_1==0.0 AND EFX_BC_INQCNT_1==0.0 AND EFX_BC_UTIL_1: [16.0:35.0[` | Clean AL DQ 1mo + No Inq 1mo + Util 16–35% | 10,881 | 10.88% | 0.24% | 0.25% | 0.25% | 0.22% | ✓ | 0.58× | EFX_BC_UTIL_1 (#1), EFX_BC_INQCNT_1 (#14) |
+| 3 | `EFX_BC_DQOCURNC_3==0.0 AND EFX_BC_INQCNT_1==0.0 AND FICO: [664.0:694.0[` | Clean BC DQ 3mo + No Inq 1mo + FICO 664–694 | 10,616 | 10.62% | 0.25% | 0.28% | 0.23% | 0.25% | ✓ | 0.62× | FICO (#4), EFX_BC_INQCNT_1 (#14) |
+| 4 | `EFX_BC_DQOCURNC_5==0.0 AND EFX_BC_INQCNT_1==0.0 AND FICO: [694.0:730.0[` | Clean BC DQ 5mo + No Inq 1mo + FICO 694–730 | 13,060 | 13.06% | 0.26% | 0.30% | 0.20% | 0.28% | ✓ | 0.64× | FICO (#4), EFX_BC_INQCNT_1 (#14) |
+| 5 | `EFX_BC_DQOCURNC_3==0.0 AND FICO: [664.0:694.0[` | Clean BC DQ 3mo + FICO 664–694 | 12,939 | 12.94% | 0.26% | 0.26% | 0.23% | 0.30% | ✓ | 0.64× | FICO (#4), EFX_BC_DQOCURNC_3 (#21) |
+| 6 | `EFX_AL_BAL_1: [67488.0:135936.0[ AND EFX_AL_DQOCURNC_1==0.0` | $67K–$136K Bal + Clean AL DQ 1mo | 13,079 | 13.08% | 0.28% | 0.33% | 0.29% | 0.21% | ✓ | 0.67× | EFX_AL_BAL_1 (#2), EFX_AL_DQOCURNC_1 (#22) |
+
+**Key observations for future runs:**
+- FICO appears in 4/6 rules — highly reliable suppression signal; watch for drift if distribution shifts
+- EFX_BC_DQOCURNC_3 appears in 3/6 rules — highly reliable suppression signal; watch for drift if distribution shifts
+- EFX_BC_INQCNT_1 appears in 3/6 rules — highly reliable suppression signal; watch for drift if distribution shifts
+- EFX_BC_UTIL_1 (0.087) is the #1 SHAP driver; EFX_AL_BAL_1 (0.084) is #2
+- Rule 'EFX_BC_DQOCURNC_5==0.0 AND EFX_BC_INQCNT_1==0.0 AND FICO: [694.0:…' has wave spread 0.20%–0.30% — monitor if this widens
+- Rule 'EFX_AL_BAL_1: [67488.0:135936.0[ AND EFX_AL_DQOCURNC_1==0.0' has wave spread 0.21%–0.33% — monitor if this widens
+- Stability pass criterion: all individual wave rates AND overall rate < BAU (0.41%)
+
+---
+
+### 2026-07-09 14:35 — capital_one_dm_suppression
+**Data:** Sample_Data.csv | BAU: 0.41% (410/100,000) | suppression
+**Features in top rules:** EFX_AL_DQOCURNC_5, EFX_BC_DQOCURNC_3, FICO, EFX_AL_DQOCURNC_1, EFX_BC_INQCNT_1, EFX_BC_UTIL_1, EFX_BC_DQOCURNC_5, EFX_AL_BAL_1
+**Segments found (v1):** 25 features | **Best lift:** 0.579x | **Top 6 deployed**
+**Stability:** 6/6 rules stable (pass = all wave rates < BAU = 0.41%)
+**Top SHAP drivers:** EFX_BC_UTIL_1 (0.087), EFX_AL_BAL_1 (0.084), EFX_AL_TRDAGE_1 (0.057), FICO (0.055), EFX_AL_DQOCURNC_3 (0.050)
+**Config delta vs prior run:** unchanged
+**Config snapshot:** {"feature_columns":["FICO","CURRENT_INCOME","EFX_AL_BAL_1","EFX_BC_BAL_1","EFX_BC_BAL_5","EFX_AR_BAL_1","EFX_AL_TRDCNT_1","EFX_BC_TRDCNT_1","EFX_BC_TRDCNT_4","EFX_AL_TRDCNT_5","EFX_BC_TRDCNT_5","EFX_AL_TRDAGE_1","EFX_BC_TRDAGE_1","EFX_BC_TRDAGE_2","EFX_BC_TRDAGE_3","EFX_BC_INQCNT_1","EFX_BC_INQCNT_2","EFX_BC_INQCNT_4","EFX_AL_DQOCURNC_1","EFX_AL_DQOCURNC_2","EFX_AL_DQOCURNC_3","EFX_BC_DQOCURNC_3","EFX_AL_DQOCURNC_5","EFX_BC_DQOCURNC_5","EFX_BC_UTIL_1"],"time_column":"TEST_CELL_DROP_DATE","min_segment_pct":1.0,"direction":"suppression","exclude_columns":["BCP_ACCOUNT_ID","BCP_APPLICATION_ID","BCP_APPLICATION_RECEIVED_DATE","PV","SOLICITATION_ID","TEST_CELL_DROP_DATE"]}
+
+**TOP 6 SUPPRESSION SEGMENTS — full rule text, wave rates, SHAP alignment:**
+
+| # | Full Rule (pysubgroup) | Business Label | Size | Size% | Overall Rate | 2026-01-06 | 2026-02-10 | 2026-03-10 | Stable | Lift | SHAP-grounded features |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | `EFX_AL_DQOCURNC_5==0.0 AND EFX_BC_DQOCURNC_3==0.0 AND FICO: [664.0:694.0[` | Clean AL DQ 5mo + Clean BC DQ 3mo + FICO 664–694 | 10,947 | 10.95% | 0.24% | 0.25% | 0.19% | 0.27% | ✓ | 0.58× | FICO (#4), EFX_BC_DQOCURNC_3 (#21) |
+| 2 | `EFX_AL_DQOCURNC_1==0.0 AND EFX_BC_INQCNT_1==0.0 AND EFX_BC_UTIL_1: [16.0:35.0[` | Clean AL DQ 1mo + No Inq 1mo + Util 16–35% | 10,881 | 10.88% | 0.24% | 0.25% | 0.25% | 0.22% | ✓ | 0.58× | EFX_BC_UTIL_1 (#1), EFX_BC_INQCNT_1 (#14) |
+| 3 | `EFX_BC_DQOCURNC_3==0.0 AND EFX_BC_INQCNT_1==0.0 AND FICO: [664.0:694.0[` | Clean BC DQ 3mo + No Inq 1mo + FICO 664–694 | 10,616 | 10.62% | 0.25% | 0.28% | 0.23% | 0.25% | ✓ | 0.62× | FICO (#4), EFX_BC_INQCNT_1 (#14) |
+| 4 | `EFX_BC_DQOCURNC_5==0.0 AND EFX_BC_INQCNT_1==0.0 AND FICO: [694.0:730.0[` | Clean BC DQ 5mo + No Inq 1mo + FICO 694–730 | 13,060 | 13.06% | 0.26% | 0.30% | 0.20% | 0.28% | ✓ | 0.64× | FICO (#4), EFX_BC_INQCNT_1 (#14) |
+| 5 | `EFX_BC_DQOCURNC_3==0.0 AND FICO: [664.0:694.0[` | Clean BC DQ 3mo + FICO 664–694 | 12,939 | 12.94% | 0.26% | 0.26% | 0.23% | 0.30% | ✓ | 0.64× | FICO (#4), EFX_BC_DQOCURNC_3 (#21) |
+| 6 | `EFX_AL_BAL_1: [67488.0:135936.0[ AND EFX_AL_DQOCURNC_1==0.0` | $67K–$136K Bal + Clean AL DQ 1mo | 13,079 | 13.08% | 0.28% | 0.33% | 0.29% | 0.21% | ✓ | 0.67× | EFX_AL_BAL_1 (#2), EFX_AL_DQOCURNC_1 (#22) |
+
+**Key observations for future runs:**
+- FICO appears in 4/6 rules — highly reliable suppression signal; watch for drift if distribution shifts
+- EFX_BC_DQOCURNC_3 appears in 3/6 rules — highly reliable suppression signal; watch for drift if distribution shifts
+- EFX_BC_INQCNT_1 appears in 3/6 rules — highly reliable suppression signal; watch for drift if distribution shifts
+- EFX_BC_UTIL_1 (0.087) is the #1 SHAP driver; EFX_AL_BAL_1 (0.084) is #2
+- Rule 'EFX_BC_DQOCURNC_5==0.0 AND EFX_BC_INQCNT_1==0.0 AND FICO: [694.0:…' has wave spread 0.20%–0.30% — monitor if this widens
+- Rule 'EFX_AL_BAL_1: [67488.0:135936.0[ AND EFX_AL_DQOCURNC_1==0.0' has wave spread 0.21%–0.33% — monitor if this widens
+- Stability pass criterion: all individual wave rates AND overall rate < BAU (0.41%)
+
+---
